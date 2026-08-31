@@ -536,14 +536,33 @@ Raw Inconsistent Values ────────► Standardized Schema Type
 
 ### 10. Duplicate Detection & Record Deduplication
 
-Detect duplicate:
+#### 🔍 Business-Key Deduplication Engine (`src/deduplication.py`)
+Rather than blindly dropping arbitrary rows, the engine performs structured multi-stage deduplication:
 
-* Student records
-* Session records
-* Quiz attempts
-* Course activity
+```text
+Deduplication Strategy
+  │
+  ├── Stage 1: Exact Full-Row Deduplication ──► Eliminates identical telemetry replay events
+  │
+  └── Stage 2: Business-Key Deduplication   ──► Resolves record collisions via domain tie-breaking:
+        ├── Students:  Key = student_id          ──► Preserves most complete non-null record
+        ├── Courses:   Key = course_id           ──► Preserves curriculum with highest module detail
+        ├── Sessions:  Key = session_id / Comp.  ──► Preserves record with highest active duration
+        └── Quizzes:   Key = quiz_attempt_id     ──► Preserves record with highest validated score
+```
 
-Remove duplicates using appropriate business keys.
+#### 📋 Business Keys & Tie-Breaking Matrix
+
+| Entity | Primary Business Key | Composite Natural Key | Tie-Breaking Strategy |
+| :--- | :--- | :--- | :--- |
+| **`students`** | `student_id` | `[student_id, target_course_id]` | Keeps record with maximum non-null profile completeness. |
+| **`courses`** | `course_id` | `[course_id]` | Keeps record with highest `total_modules` and title details. |
+| **`sessions`** | `session_id` | `[student_id, course_id, session_start]` | Keeps record with highest `duration_minutes` & `active_minutes`. |
+| **`quizzes`** | `quiz_attempt_id` | `[student_id, quiz_id, attempt_number]` | Keeps record with highest `score_percentage` and pass validation. |
+
+#### 📊 Quality Scorecards & Reporting
+- **`DeduplicationReport`**: Captures initial rows, final rows, exact duplicates removed, business-key duplicates removed, and duplicate percentages.
+- **`generate_deduplication_scorecard(reports)`**: Builds comparative deduplication scorecard DataFrames for Streamlit dashboard visualization.
 
 ---
 
