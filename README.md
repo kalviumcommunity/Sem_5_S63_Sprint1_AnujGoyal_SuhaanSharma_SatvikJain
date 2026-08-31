@@ -509,21 +509,28 @@ Missing Value Detection
 
 ### 09. Data Type Enforcement & Standardisation
 
-Standardize:
-
-* Dates
-* Numeric columns
-* Boolean values
-* Categories
-* Student IDs
-
-Example:
+#### 🔠 Standardisation & Type Enforcement Layer (`src/standardization.py`)
+The pipeline standardizes heterogeneous, messy data inputs into clean, SQL-ready, strictly typed representations:
 
 ```text
-"85%" → 85.0
-"2026/08/01" → datetime
-"Completed" → completed
+Raw Inconsistent Values ────────► Standardized Schema Type
+-----------------------------------------------------------
+"85%", " 92.5 % ", 0.85 ────────► 85.0, 92.5 (Float)
+"2026/08/01", "01-08-2026" ─────► datetime64 / "YYYY-MM-DD"
+"s001", " stu_102 " ────────────► "S001", "STU_102" (Uppercase String)
+"completed", "passed" ──────────► "Completed" (Domain Category)
+"undergrad", "bachelors" ───────► "Undergraduate" (Domain Category)
+"PASS", "true", "1", True ──────► 1 (Integer Boolean Flag)
+"FAIL", "false", "0", False ────► 0 (Integer Boolean Flag)
 ```
+
+#### 🛠️ Standardisation Functions
+- **`clean_percentage_value(val)`**: Converts string percentages and fractional numbers into standardized `0.0`–`100.0` floats.
+- **`clean_boolean_flag(val)`**: Maps diverse truthy/falsy inputs (`PASS`, `FAIL`, `true`, `false`, `1`, `0`) to integer flags (`1` or `0`).
+- **`standardize_identifiers(df, id_cols)`**: Trims whitespace, strips string artifacts, and converts identifiers to uppercase.
+- **`standardize_dates(df, date_cols)` & `standardize_timestamps(df, ts_cols)`**: Parses dates into `datetime64` and ISO-standard strings (`YYYY-MM-DD` / `YYYY-MM-DD HH:MM:SS`).
+- **`standardize_categories(df)`**: Applies domain synonym mapping for `completion_status`, `gender`, `device_type`, and `education_level`.
+- **`standardize_entity(df, entity_name)`**: Orchestrates all standardizations per entity model for seamless SQLite insertion.
 
 ---
 
