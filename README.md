@@ -452,21 +452,20 @@ Dataset Input
 
 ### 07. Data Dictionary & Business Context Mapping
 
-Create a data dictionary.
+#### 📖 Full Data Dictionary
+See detailed technical specification: [`docs/data_dictionary.md`](docs/data_dictionary.md) and programmatic interface in `src/data_dictionary.py`.
 
-Example:
+#### 🧭 Business Context Mapping for Key Analytics Columns
 
-| Column            | Meaning                      |
-| ----------------- | ---------------------------- |
-| student_id        | Unique student               |
-| course_id         | Course identifier            |
-| session_date      | Date of learning activity    |
-| session_duration  | Time spent learning          |
-| quiz_score        | Quiz performance             |
-| progress_pct      | Course completion percentage |
-| completion_status | Completed / Dropped          |
-
-This connects technical columns to actual business meaning.
+| Column Name | Technical Type | Required | Valid Range / Categories | Business Definition | Analysis Application |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **`student_id`** | `string` | **Yes** | Unique alphanumeric ID | Platform learner identifier. | Key for student-level aggregations, cohort tracking, and risk models. |
+| **`course_id`** | `string` | **Yes** | Unique alphanumeric ID | Course catalog identifier. | Baseline for curriculum difficulty and course completion KPIs. |
+| **`session_date`** | `date` | **Yes** | `YYYY-MM-DD` | Calendar day of learning. | Daily active users (DAU), day-of-week habits, and study regularity. |
+| **`session_duration`** | `float` | **Yes** | `0.1` to `600.0` mins | Total session duration. | Platform engagement depth and gross learning time. |
+| **`quiz_score`** | `float` | **Yes** | `0.0` to `100.0%` | Graded quiz exam score. | Academic performance KPI and knowledge competency indicator. |
+| **`progress_pct`** | `float` | **Yes** | `0.0` to `100.0%` | Course modules completed %. | Progress velocity, milestone tracking, and dropout points. |
+| **`completion_status`** | `string` | **Yes** | `Completed`, `Dropped`, `In Progress` | Ground-truth outcome. | Target variable for dropout prediction models and business reporting. |
 
 ---
 
