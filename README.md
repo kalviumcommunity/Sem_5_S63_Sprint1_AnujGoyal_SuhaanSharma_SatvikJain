@@ -692,19 +692,33 @@ Business Rule Validation Checks
 
 ### 15. Multi-Source Merging & Join Validation
 
-Merge:
+#### 🔗 Relational Merging Pipeline (`src/merging.py`)
+Combines disparate student profile, course catalog, session telemetry, and quiz assessment entities into unified analytical tables with strict join validation:
 
 ```text
-Students
-   +
-Courses
-   +
-Sessions
-   +
-Quizzes
+Students (Base: 1 Row/Student)
+  │
+  ├── 1. Left Join Courses           ──► target_course_id == course_id (Course dimensions)
+  │
+  ├── 2. Left Join Aggregated Sessions──► student_id == student_id (Study volume, active minutes, frequency)
+  │
+  ├── 3. Left Join Aggregated Quizzes ──► student_id == student_id (Attempts, pass rate, avg score, progress %)
+  │
+  └── 4. Output: Student 360 Dataset  ──► Preserves exact student granularity (Expansion factor: 1.00x)
 ```
 
-Validate that joins do not unexpectedly increase or decrease record counts.
+#### 📋 Relational Join Keys & Aggregations
+
+| Entity Pair | Join Key(s) | Join Type | Aggregation Strategy / Output |
+| :--- | :--- | :--- | :--- |
+| **`Students` + `Courses`** | `target_course_id` $\rightarrow$ `course_id` | `LEFT` | Adds `course_title`, `category`, `total_modules`, `total_quizzes`. |
+| **`Students` + `Sessions`** | `student_id` $\rightarrow$ `student_id` | `LEFT` | Pre-aggregates `total_sessions`, `total_duration_minutes`, `active_learning_ratio`. |
+| **`Students` + `Quizzes`** | `student_id` $\rightarrow$ `student_id` | `LEFT` | Pre-aggregates `total_quiz_attempts`, `quizzes_passed`, `avg_quiz_score`, `quiz_pass_rate`. |
+
+#### 📊 Join Validation & Orphan Auditing
+- **`validate_two_table_join()`**: Tracks unmatched left rows, unmatched right rows, and duplicate expansion factors ($> 1.0$ alerts on Cartesian product fan-out).
+- **`build_student_360_dataset()`**: Generates student 360 master table while maintaining strict 1-to-1 learner grain.
+- **`JoinAuditReport`**: Exposes orphan diagnostics (unregistered students with sessions, inactive students with 0 logins, unassessed students) without hiding data gaps.
 
 ---
 
