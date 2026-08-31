@@ -618,18 +618,35 @@ Raw Timestamp ("2026-08-01 09:15:00")
 
 ### 13. Outlier Detection with Statistical Methods
 
-Detect abnormal values such as:
+#### 📈 Non-Destructive Statistical Outlier Engine (`src/outliers.py`)
+Rather than blindly deleting records with unusual values, the engine mathematically detects and classifies records while preserving the underlying telemetry:
 
-* Extremely long sessions
-* Impossible quiz scores
-* Abnormally high activity
-* Unrealistic progress values
+```text
+Numerical Feature Input
+  │
+  ├── 1. IQR Method    ──► Normal: [Q1 - 1.5*IQR, Q3 + 1.5*IQR]
+  │                        Mild Outlier: (1.5*IQR to 3.0*IQR)
+  │                        Extreme Outlier: (> 3.0*IQR)
+  │
+  ├── 2. Z-Score Method ──► Normal: |Z| < 3.0
+  │                        Outlier: |Z| >= 3.0, Extreme: |Z| >= 3.5
+  │
+  └── 3. Domain Check  ──► Domain Anomaly (e.g. score > 100%, session < 0 mins, duration > 12h)
+```
 
-Possible methods:
+#### 📋 Monitored Telemetry Variables
 
-* IQR
-* Z-score
-* Percentile analysis
+| Variable Name | Method | Normal Range / Bounds | Classification Tiers |
+| :--- | :--- | :--- | :--- |
+| **`duration_minutes`** | **IQR** | $[Q_1 - 1.5 \times IQR, Q_3 + 1.5 \times IQR]$ | `Normal`, `Mild Outlier` (Power study), `Extreme Outlier`, `Domain Anomaly` ($>720$m). |
+| **`score_percentage`** | **Z-Score** | $|Z| < 3.0$ & $[0.0, 100.0\%]$ | `Normal`, `Mild Outlier`, `Domain Anomaly` ($<0\%$ or $>100\%$). |
+| **`progress_pct`** | **Domain / IQR** | $[0.0, 100.0\%]$ | `Normal`, `Domain Anomaly` ($>100\%$). |
+| **`active_minutes`** | **IQR** | $\le \text{duration\_minutes}$ | `Normal`, `Extreme Outlier`, `Domain Anomaly` ($>\text{duration}$). |
+
+#### 📊 Outlier Reports & Scorecards
+- **`ColumnOutlierSummary`**: Statistical breakdown capturing $Q_1$, $Q_3$, $IQR$, mean, std dev, lower/upper bounds, and anomaly frequencies.
+- **`tag_dataset_outliers(df, entity_name)`**: Enriches records with `{col}_is_outlier` binary flags and `{col}_outlier_class` tags for downstream investigation and dashboard filtering without row loss.
+- **`generate_outlier_scorecard(reports)`**: Builds multi-entity comparative outlier scorecards for Streamlit monitoring.
 
 ---
 
