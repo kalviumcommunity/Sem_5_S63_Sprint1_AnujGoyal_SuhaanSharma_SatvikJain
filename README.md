@@ -276,26 +276,35 @@ The project is intentionally designed to cover **all 50 concepts** from the Spri
 
 ### 02. GitHub Repository & Team Workflow Setup
 
-Create a GitHub repository and establish:
+#### 👥 3-Member Team Collaboration Model
+- **Contributors:** Anuj Goyal, Suhaan Sharma, Satvik Jain
+- **Repository Structure & Workflow Guide:** See [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
-* Main branch
-* Development branch
-* Feature branches
-* Pull requests
-* Issues
-* Commit conventions
+#### 🌿 Branching Strategy & Conventions
+- **`main`**: Production-ready, stable releases.
+- **`develop`**: Integration branch for ongoing sprint concepts.
+- **`feature/<concept-id>-<name>`**: Dedicated branch per sprint concept (e.g., `feature/02-github-workflow`).
+- **`fix/<issue-id>-<name>`**: Dedicated bugfix branches.
 
-Example:
+#### 💬 Commit Conventions (Conventional Commits)
+- `feat:` Introduces a new sprint concept or feature.
+- `fix:` Patches a bug or regression in data pipelines.
+- `docs:` Documentation or guideline updates.
+- `test:` Adds or modifies automated unit tests.
+- `refactor:` Code restructuring without functional changes.
+- `chore:` Maintenance, configuration, or environment changes.
 
-```text
-main
-│
-├── development
-│
-├── feature/data-cleaning
-├── feature/sql-analysis
-└── feature/dashboard
-```
+#### 📋 PR & Issue Templates
+- Pull Request Template: [`.github/pull_request_template.md`](.github/pull_request_template.md)
+- Issue Templates:
+  - Sprint Concept Task: [`.github/ISSUE_TEMPLATE/concept_task.md`](.github/ISSUE_TEMPLATE/concept_task.md)
+  - Bug Report: [`.github/ISSUE_TEMPLATE/bug_report.md`](.github/ISSUE_TEMPLATE/bug_report.md)
+  - Feature Request: [`.github/ISSUE_TEMPLATE/feature_request.md`](.github/ISSUE_TEMPLATE/feature_request.md)
+
+#### 🔍 Review & Quality Gate
+1. All changes require feature branches (no direct commits to `main`).
+2. Mandatory local validation (`python -m pytest` and `python main.py`) before opening PRs.
+3. At least one peer review approval before merging.
 
 ---
 
