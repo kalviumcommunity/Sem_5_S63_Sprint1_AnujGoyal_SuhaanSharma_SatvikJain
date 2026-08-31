@@ -471,19 +471,39 @@ See detailed technical specification: [`docs/data_dictionary.md`](docs/data_dict
 
 ### 08. Missing Value Detection & Imputation
 
-Identify missing values in:
+#### 🧹 Domain-Specific Imputation Rules (`src/imputation.py`)
+Rather than blindly filling missing entries with zeros, the pipeline implements business-driven imputation strategies:
 
-* Quiz scores
-* Session duration
-* Course progress
-* Course information
+```text
+Missing Value Detection
+  │
+  ├── 1. Primary / Foreign Key Nulls ──► Dropped (Records cannot be safely recovered without learner ID)
+  │
+  ├── 2. Numerical Demographics (Age) ──► Median Imputation (Preserves distribution without artificial skew)
+  │
+  ├── 3. Categorical Attributes       ──► Explicit Category 'Unknown' (Preserves absence of information)
+  │
+  ├── 4. Session Time Components      ──► Delta Recovery (duration = active + idle, active = duration - idle)
+  │
+  └── 5. Assessment Metrics (Quizzes) ──► Quiz-Specific Median Score & Logical Pass/Fail derivation
+```
 
-Apply appropriate strategies such as:
+#### 📋 Treatment Rules Matrix
 
-* Mean/median
-* Forward filling
-* Business rules
-* Removing invalid records
+| Entity | Column | Treatment Strategy | Business Rationale |
+| :--- | :--- | :--- | :--- |
+| **`students`** | `student_id` | **Drop Null Row** | Core primary key; unidentifiable learner records cannot be analyzed. |
+| **`students`** | `age` | **Median Imputation** | Preserves learner demographic distribution without zero-skewing. |
+| **`students`** | `gender`, `education_level`, `device_type` | **Explicit `'Unknown'`** | Categorical transparency; prevents false classification. |
+| **`courses`** | `category` | **Explicit `'General'`** | Fallback course classification. |
+| **`sessions`** | `duration_minutes` | **`active_minutes + idle_minutes` / Median** | Recovers total elapsed session time mathematically. |
+| **`sessions`** | `active_minutes` | **`duration_minutes - idle_minutes` / Median** | Derives real active study duration. |
+| **`quizzes`** | `score_percentage` | **Quiz Median Score** | Replaces nulls with typical cohort exam achievement (never zero). |
+| **`quizzes`** | `passed` | **Derived (`score >= 70%`)** | Consistent boolean flag derived from final score. |
+
+#### 📊 Quality Audit Reporting
+- **`ImputationReport`**: Tracks initial vs. final rows, dropped records, cell completeness percentage before & after, and per-column action logs.
+- **`detect_missing_values(df)`**: Audits missingness frequency across datasets.
 
 ---
 
