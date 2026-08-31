@@ -1,6 +1,6 @@
 """
 Data Cleaning Module for Learning Analytics.
-Handles deduplication, missing value imputation, type casting, and standardisation.
+Handles deduplication, missing value imputation, data type enforcement, and value standardisation.
 """
 
 from typing import Dict, Any, Tuple, Optional
@@ -12,6 +12,15 @@ from src.imputation import (
     impute_all_datasets,
     ImputationReport
 )
+from src.standardization import (
+    standardize_entity,
+    clean_percentage_value,
+    clean_boolean_flag,
+    standardize_categories,
+    standardize_identifiers,
+    standardize_dates,
+    standardize_timestamps
+)
 
 logger = setup_logger(__name__)
 
@@ -19,13 +28,15 @@ logger = setup_logger(__name__)
 def clean_dataframe(
     df: pd.DataFrame,
     entity_name: Optional[str] = None,
-    impute_nulls: bool = True
+    impute_nulls: bool = True,
+    standardize: bool = True
 ) -> pd.DataFrame:
     """
     Performs comprehensive cleaning on a DataFrame:
     1. Deduplication
     2. String whitespace stripping
     3. Domain-specific missing value imputation
+    4. Type enforcement and category/date/boolean standardisation
     """
     if df is None or df.empty:
         return pd.DataFrame() if df is None else df
@@ -40,6 +51,10 @@ def clean_dataframe(
     # Domain imputation
     if impute_nulls:
         cleaned, _ = impute_dataset(cleaned, entity_name=entity_name)
+
+    # Standardization
+    if standardize and entity_name:
+        cleaned = standardize_entity(cleaned, entity_name=entity_name)
 
     logger.info(f"Cleaned dataset: {len(df)} -> {len(cleaned)} rows")
     return cleaned
