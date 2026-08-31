@@ -310,21 +310,50 @@ The project is intentionally designed to cover **all 50 concepts** from the Spri
 
 ### 03. Python Data Workflow Foundations
 
-Build the basic Python pipeline:
+#### 🏗️ Architecture & Pipeline Flow
+The project establishes a modular, reusable Python data processing architecture:
 
 ```text
-Load
- ↓
-Inspect
- ↓
-Transform
- ↓
-Analyze
- ↓
-Export
+┌─────────────────┐
+│  Load Datasets  │ ➔ CSV / JSON loader with type detection (src/ingestion.py)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Inspect & Profile│ ➔ Shape, dtypes, nulls, duplicates, memory profiling (src/inspection.py)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│    Transform    │ ➔ Sanitized column names, type casting, datetime parsing (src/transformation.py)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   Save & Export │ ➔ Processed CSV / JSON and SQLite database tables (src/storage.py)
+└─────────────────┘
 ```
 
-Use Pandas and NumPy as the primary analysis tools.
+#### 📦 Reusable Workflow Components
+1. **Ingestion Layer (`src/ingestion.py`):**
+   - `load_dataset(file_path, format)` — Robust file loader supporting CSV, JSON, and Excel with error handling (`DataLoadError`).
+   - `load_all_raw_data()` — Batch loader for all raw project datasets.
+2. **Inspection Layer (`src/inspection.py`):**
+   - `inspect_dataframe(df, dataset_name)` — Profiles row counts, column counts, missing values, duplicates, and memory footprint in MB.
+   - `get_column_summary(df)` — Detailed column-level summary and distinct value profiling.
+3. **Transformation Layer (`src/transformation.py`):**
+   - `standardize_column_names(df)` — Cleans whitespace, lowercases, and replaces special characters with underscores.
+   - `cast_column_types(df, type_mapping)` — Robust type casting.
+   - `parse_datetime_columns(df, columns)` — Coerced datetime conversions.
+   - `derive_column(df, new_col, func)` — Vectorized column derivations.
+4. **Storage & Export Layer (`src/storage.py`):**
+   - `save_dataframe(df, file_path, format)` — Saves dataframes to CSV or JSON with automatic directory creation.
+   - `save_to_database(df, table_name, db_path)` — Persists DataFrames directly into SQLite tables.
+5. **Workflow Orchestrator (`src/workflow.py`):**
+   - `DataWorkflow` class providing a fluent interface: `.load() -> .inspect() -> .transform() -> .export()`.
+6. **Error Handling & Timing (`src/utils.py`):**
+   - Custom exceptions: `DataWorkflowError`, `DataLoadError`, `TransformationError`, `DataExportError`.
+   - `@timed_step` decorator for benchmarking pipeline step execution times.
 
 ---
 
