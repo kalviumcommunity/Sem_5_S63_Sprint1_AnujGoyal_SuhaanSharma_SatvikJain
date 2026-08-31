@@ -652,19 +652,41 @@ Numerical Feature Input
 
 ### 14. Data Consistency & Validation Rules
 
-Create business rules such as:
+#### ⚖️ Business Consistency Engine (`src/consistency.py`)
+Enforces domain rules and cross-entity relationship constraints with full audit tracking:
 
 ```text
-quiz_score must be between 0 and 100
-
-progress must be between 0 and 100
-
-session_duration must be positive
-
-completion_status must be valid
-
-session_date cannot be before enrollment_date
+Business Rule Validation Checks
+  │
+  ├── 1. Assessment Scores   ──► 0.0 <= score_percentage <= 100.0%
+  │
+  ├── 2. Learning Progress   ──► 0.0 <= progress_pct <= 100.0%
+  │
+  ├── 3. Session Durations   ──► duration_minutes > 0.0 (Strictly Positive)
+  │
+  ├── 4. Categorical Status  ──► completion_status in {'Completed', 'In Progress', 'Dropped', 'Inactive'}
+  │
+  ├── 5. Logical Timestamps  ──► session_start <= session_end
+  │
+  └── 6. Cross-Entity Timing ──► student registration_date <= activity date (session_start / attempt_date)
 ```
+
+#### 📋 Business Rules Matrix
+
+| Rule Name | Target Column / Entity | Constraint Definition | Action on Violation |
+| :--- | :--- | :--- | :--- |
+| **Score Bounds** | `quizzes.score_percentage` | $0.0 \le \text{score} \le 100.0\%$ | Logged in `RuleViolation` audit trail. |
+| **Progress Bounds** | `students.progress_pct` | $0.0 \le \text{progress} \le 100.0\%$ | Logged in `RuleViolation` audit trail. |
+| **Positive Duration** | `sessions.duration_minutes` | $\text{duration} > 0.0$ mins | Logged in `RuleViolation` audit trail. |
+| **Approved Status** | `students.completion_status` | Status in approved category domain | Flagged for remediation. |
+| **Valid Identifiers** | `*_id` across all entities | Non-empty, no `"NAN"`/`"NULL"` strings | Flagged in audit report. |
+| **Session Sequence** | `sessions.session_start/end` | $\text{session\_start} \le \text{session\_end}$ | Flagged in audit report. |
+| **Enrollment Precedence** | Cross-Entity (`students` + `sessions`) | $\text{registration\_date} \le \text{session\_date}$ | Flagged in audit report. |
+
+#### 📊 Validation Reports & Audit Logging
+- **`RuleViolation`**: Structured error log capturing rule name, entity, row index, record ID, invalid value, reason, and action taken.
+- **`ConsistencyReport`**: Captures total checked records, passed count, violation count, and pass percentage.
+- **`generate_consistency_scorecard(reports)`**: Builds a comparative multi-entity rule compliance scorecard for Streamlit and analytics audit.
 
 ---
 
