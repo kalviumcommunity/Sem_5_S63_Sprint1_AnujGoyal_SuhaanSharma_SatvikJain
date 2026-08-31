@@ -390,18 +390,33 @@ Incoming Dataset
 
 ### 05. CSV & JSON Data Ingestion
 
-Support both:
+#### 📥 Multi-Source Ingestion Engine (`src/ingestion.py`)
+The ingestion layer enables seamless ingestion of both CSV and JSON student datasets into Pandas DataFrames:
 
 ```text
-students.csv
-sessions.csv
-quizzes.csv
-courses.csv
+┌─────────────────────────────────────────────────────────────┐
+│                 Supported Core Entities                     │
+├─────────────────┬──────────────────┬────────────────────────┤
+│ Entity          │ CSV Source       │ JSON Source            │
+├─────────────────┼──────────────────┼────────────────────────┤
+│ Students        │ students.csv     │ students.json          │
+│ Courses         │ courses.csv      │ courses.json           │
+│ Sessions        │ sessions.csv     │ sessions.json          │
+│ Quizzes         │ quizzes.csv      │ quizzes.json           │
+└─────────────────┴──────────────────┴────────────────────────┘
 ```
 
-and JSON sources where required.
-
-Python will load the data into Pandas DataFrames.
+#### ⚙️ Key Ingestion Capabilities
+1. **`load_dataset(file_path, format, validate_source, entity_name)`:**
+   - Universal dataset loader with format auto-detection (`csv`, `json`, `xlsx`).
+   - Integrated source validation and entity-level schema checks.
+   - Encoding resilience with automated Latin-1 fallback if UTF-8 fails.
+2. **`read_json_flexible(file_path)`:**
+   - Multi-orientation JSON reader supporting record lists, split arrays, and nested key-value dictionaries.
+3. **`ingest_entity(entity_name, directory, preferred_formats)`:**
+   - Reusable entity discoverer that locates and ingests whichever format is present.
+4. **`ingest_all_entities(directory, preferred_formats)`:**
+   - Batch intake loader returning a dictionary of all 4 project DataFrames.
 
 ---
 
