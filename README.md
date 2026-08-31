@@ -568,15 +568,27 @@ Deduplication Strategy
 
 ### 11. String Cleaning & Text Normalisation
 
-Normalize text fields such as:
+#### 🔤 Reusable Text Cleaning Suite (`src/text_cleaning.py`)
+Provides granular text sanitisation while safeguarding technical abbreviations and alphanumeric identifiers:
 
 ```text
-" Data Science "
-"data science"
-"DATA SCIENCE"
+Raw Inconsistent Text ─────────────────► Clean Standardized String
+-------------------------------------------------------------------
+"   Data Science   " ──────────────────► "Data Science" (Whitespace Trimmed)
+"Python   for    Data   Science" ──────► "Python for Data Science" (Multi-Space Collapsed)
+"intro to machine learning (ai/ml)" ───► "Intro to Machine Learning (AI/ML)" (Acronyms Preserved)
+"advanced sql and aws architecture" ───► "Advanced SQL and AWS Architecture"
+"web dev", "web-dev", "frontend" ──────► "Web Development" (Canonical Domain)
+"cyber security", "cyber-sec" ─────────► "Cybersecurity" (Canonical Domain)
+"ds", "data_science", "DATA SCIENCE" ──► "Data Science" (Canonical Domain)
 ```
 
-into a consistent representation.
+#### 🛠️ Text Cleaning Modules
+- **`normalize_whitespace(text)`**: Cleans tabs (`\t`), newlines (`\n`), non-breaking spaces (`\xa0`), and collapses internal consecutive whitespace.
+- **`clean_text_string(text, casing)`**: Applies intelligent grammar-aware title casing, keeping grammatical particles lowercase and capitalizing technical acronyms (`AI`, `ML`, `SQL`, `AWS`, `GCP`, `API`, `HTML`, `CSS`, `JS`, `UI`, `UX`).
+- **`clean_course_title(title)`**: Sanitizes catalog titles with acronym preservation (e.g. `(AI/ML)`).
+- **`clean_category_label(category)`**: Maps informal subject aliases into canonical vertical categories.
+- **`clean_text_dataframe(df, entity_name)`**: Applies vectorized text standardisation across all string columns in an entity DataFrame.
 
 ---
 

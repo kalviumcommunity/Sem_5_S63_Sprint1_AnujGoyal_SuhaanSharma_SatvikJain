@@ -1,6 +1,7 @@
 """
 Data Cleaning Module for Learning Analytics.
-Handles deduplication, missing value imputation, data type enforcement, and value standardisation.
+Handles deduplication, missing value imputation, data type enforcement,
+string sanitisation, text normalization, and value standardisation.
 """
 
 from typing import Dict, Any, Tuple, Optional
@@ -28,6 +29,13 @@ from src.deduplication import (
     generate_deduplication_scorecard,
     DeduplicationReport
 )
+from src.text_cleaning import (
+    normalize_whitespace,
+    clean_text_string,
+    clean_course_title,
+    clean_category_label,
+    clean_text_dataframe
+)
 
 logger = setup_logger(__name__)
 
@@ -36,13 +44,14 @@ def clean_dataframe(
     df: pd.DataFrame,
     entity_name: Optional[str] = None,
     deduplicate: bool = True,
+    clean_text: bool = True,
     impute_nulls: bool = True,
     standardize: bool = True
 ) -> pd.DataFrame:
     """
     Performs comprehensive multi-stage cleaning on a DataFrame:
     1. Exact & Business-Key Deduplication
-    2. String whitespace stripping
+    2. String whitespace normalization & text cleaning
     3. Domain-specific missing value imputation
     4. Type enforcement and category/date/boolean standardisation
     """
@@ -55,10 +64,9 @@ def clean_dataframe(
     if deduplicate:
         cleaned, _ = deduplicate_dataset(cleaned, entity_name=entity_name)
 
-    # 2. Strip whitespace from string and object columns
-    str_cols = cleaned.select_dtypes(include=["object", "string"]).columns
-    for col in str_cols:
-        cleaned[col] = cleaned[col].astype(str).str.strip()
+    # 2. String Cleaning & Text Normalization
+    if clean_text:
+        cleaned = clean_text_dataframe(cleaned, entity_name=entity_name)
 
     # 3. Domain imputation
     if impute_nulls:
