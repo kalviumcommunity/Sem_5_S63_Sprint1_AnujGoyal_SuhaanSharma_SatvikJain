@@ -726,20 +726,37 @@ Students (Base: 1 Row/Student)
 
 ### 16. Feature Engineering & Derived Business Columns
 
-Create behavioural metrics such as:
+#### 🔬 Behavioral Learning Telemetry Engine (`src/features.py`)
+Computes domain-grounded behavioral metrics designed to predict course completion and identify silent dropouts:
 
 ```text
-average_session_duration
-sessions_per_week
-quiz_average
-quiz_attempt_count
-progress_velocity
-days_since_last_activity
-completion_rate
-engagement_score
+Student 360 Feature Ingestion
+  │
+  ├── 1. Study Rhythm     ──► average_session_duration, sessions_per_week, learning_consistency
+  │
+  ├── 2. Assessment Mastery──► quiz_average, quiz_attempt_count, quiz_pass_rate
+  │
+  ├── 3. Pacing & Momentum──► course_progress, progress_velocity (% completion / tenure week)
+  │
+  ├── 4. Inactivity & Risk ──► days_since_last_activity (snapshot recency)
+  │
+  └── 5. Composite Index  ──► engagement_score [0.0 - 100.0] & completion_rate [Target Binary]
 ```
 
-These features become the foundation of the analysis.
+#### 📋 Engineered Feature Definitions & Mathematical Formulas
+
+| Feature Name | Type | Mathematical Formula / Derivation | Business Objective |
+| :--- | :--- | :--- | :--- |
+| **`average_session_duration`** | Float | $\frac{\text{total\_duration\_minutes}}{\max(\text{total\_sessions}, 1)}$ | Measures average study session depth (in minutes). |
+| **`sessions_per_week`** | Float | $\frac{\text{total\_sessions}}{\max(\text{tenure\_weeks}, 1.0)}$ | Tracks active study cadence and weekly habit strength. |
+| **`quiz_average`** | Float | $\text{mean}(\text{score\_percentage})$ | Core assessment mastery benchmark across all quizzes. |
+| **`quiz_attempt_count`** | Integer | $\sum \text{attempts}$ | Evaluates student grit and revision effort. |
+| **`course_progress`** | Float | $\min(100.0, \frac{\text{quizzes\_passed}}{\text{total\_quizzes}} \times 100.0)$ | Direct metric of syllabus completion percentage. |
+| **`progress_velocity`** | Float | $\frac{\text{course\_progress}}{\max(\text{tenure\_weeks}, 1.0)}$ | Quantifies weekly syllabus advancement rate. |
+| **`days_since_last_activity`** | Integer | $(\text{benchmark\_date} - \max(\text{session}, \text{quiz})).\text{days}$ | Primary early warning indicator for silent dropouts. |
+| **`completion_rate`** | Binary | $1.0\text{ if }\text{status} == \text{'Completed'}\text{ else }0.0$ | Supervised ground truth target label. |
+| **`learning_consistency`** | Float | $0.6 \times \min(1, \frac{\text{sessions}}{\text{tenure} \times 2}) + 0.4 \times \text{active\_ratio}$ | Regularity score bounded within $[0.0, 1.0]$. |
+| **`engagement_score`** | Float | $0.30\cdot\text{prog} + 0.25\cdot\text{quiz\_rate} + 0.25\cdot\min(100, \text{freq}\cdot 25) + 0.20\cdot(\text{active}\cdot 100)$ | Comprehensive learner health index ($0-100$). |
 
 ---
 
