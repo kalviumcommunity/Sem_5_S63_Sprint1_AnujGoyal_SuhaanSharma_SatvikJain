@@ -1,6 +1,6 @@
 """
 Python Data Workflow Foundations Pipeline.
-Orchestrates reusable loading, inspecting, transforming, and saving of learning analytics data.
+Orchestrates reusable loading, validating, inspecting, transforming, and saving of learning analytics data.
 """
 
 from pathlib import Path
@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, List, Union
 import pandas as pd
 from src.utils import setup_logger, timed_step, ensure_directories_exist
 from src.ingestion import load_dataset, load_all_raw_data
+from src.validation import validate_intake_pipeline
 from src.inspection import inspect_dataframe
 from src.transformation import standardize_column_names, cast_column_types, parse_datetime_columns
 from src.storage import save_dataframe, save_to_database
@@ -18,12 +19,13 @@ logger = setup_logger(__name__)
 class DataWorkflow:
     """
     Reusable data workflow orchestrator following the pipeline principle:
-    Load -> Inspect -> Transform -> Export
+    Load -> Validate -> Inspect -> Transform -> Export
     """
 
     def __init__(self, name: str = "LearningAnalyticsWorkflow"):
         self.name = name
         self.raw_data: Dict[str, pd.DataFrame] = {}
+        self.validation_results: Dict[str, Any] = {}
         self.inspections: Dict[str, Dict[str, Any]] = {}
         self.transformed_data: Dict[str, pd.DataFrame] = {}
         ensure_directories_exist()
@@ -39,6 +41,12 @@ class DataWorkflow:
             self.raw_data = source
         else:
             self.raw_data = load_all_raw_data()
+        return self
+
+    @timed_step("Workflow Validate Step")
+    def validate(self, raise_on_error: bool = False) -> "DataWorkflow":
+        """Validates all ingested datasets against expected schema and integrity constraints."""
+        self.validation_results = validate_intake_pipeline(self.raw_data, raise_on_error=raise_on_error)
         return self
 
     @timed_step("Workflow Inspect Step")
@@ -105,11 +113,15 @@ class DataWorkflow:
         self,
         source: Optional[Union[str, Path, Dict[str, pd.DataFrame]]] = None,
         output_dir: Optional[Path] = None,
-        save_to_db: bool = False
+        save_to_db: bool = False,
+        validate_schema: bool = True,
+        raise_on_validation_error: bool = False
     ) -> Dict[str, Any]:
         """Executes full workflow end-to-end and returns run summary."""
         logger.info(f"Executing workflow '{self.name}'...")
         self.load(source if source is not None else {})
+        if validate_schema:
+            self.validate(raise_on_error=raise_on_validation_error)
         self.inspect()
         self.transform()
         saved = self.export(output_dir=output_dir, save_to_db=save_to_db)
@@ -117,6 +129,7 @@ class DataWorkflow:
         return {
             "workflow_name": self.name,
             "status": "SUCCESS",
+            "validation_status": self.validation_results.get("status", "SKIPPED"),
             "datasets_loaded": list(self.raw_data.keys()),
             "datasets_inspected": list(self.inspections.keys()),
             "datasets_transformed": list(self.transformed_data.keys()),

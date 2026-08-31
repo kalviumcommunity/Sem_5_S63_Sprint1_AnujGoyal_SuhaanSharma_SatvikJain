@@ -34,6 +34,11 @@ class DataLoadError(DataWorkflowError):
     pass
 
 
+class ValidationError(DataWorkflowError):
+    """Raised when dataset intake validation fails."""
+    pass
+
+
 class TransformationError(DataWorkflowError):
     """Raised when transforming a dataset fails."""
     pass

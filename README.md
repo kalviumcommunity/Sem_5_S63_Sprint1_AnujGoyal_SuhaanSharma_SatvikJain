@@ -361,14 +361,30 @@ The project establishes a modular, reusable Python data processing architecture:
 
 ### 04. Dataset Intake & Source Validation
 
-Before processing the data:
+#### 🛡️ Intake Validation Architecture
+The validation layer (`src/validation.py`) enforces rigorous quality gates on raw datasets before downstream transformations:
 
-* Verify file existence.
-* Check file format.
-* Check required columns.
-* Check row counts.
-* Validate data types.
-* Detect corrupted records.
+```text
+Incoming Dataset 
+  │
+  ├── 1. Physical File Validation ──► validate_file_source() [Existence, readability, non-empty 0-byte check, format]
+  │
+  ├── 2. Schema Structure Check   ──► validate_dataset_schema() [Required columns, column counts, missing keys]
+  │
+  ├── 3. Volume & Thresholds      ──► validate_row_thresholds() [Non-empty dataframe, minimum row limits]
+  │
+  └── 4. Entity-Level Integrity   ──► validate_entity_dataset() [Students, Sessions, Quizzes, Courses schemas]
+```
+
+#### 📋 Core Entity Schemas
+- **`students`**: `student_id`, `registration_date`, `age`, `gender`, `education_level`, `device_type`, `target_course_id`, `completion_status`
+- **`sessions`**: `session_id`, `student_id`, `course_id`, `session_start`, `session_end`, `duration_minutes`, `active_minutes`, `idle_minutes`
+- **`quizzes`**: `quiz_attempt_id`, `student_id`, `course_id`, `quiz_id`, `attempt_number`, `attempt_date`, `score_percentage`, `time_taken_minutes`, `passed`
+- **`courses`**: `course_id`, `course_title`, `category`, `total_modules`, `total_quizzes`, `estimated_duration_hours`
+
+#### 🚨 Error Handling & Reporting
+- Fails clearly with `ValidationError` when required columns, formats, or entity structures are violated.
+- Returns structured `ValidationResult` objects with boolean `is_valid`, detailed `errors`, `warnings`, and dimension statistics.
 
 ---
 
