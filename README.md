@@ -594,19 +594,25 @@ Raw Inconsistent Text ─────────────────► Cle
 
 ### 12. Date & Time Transformation Pipeline
 
-Convert timestamps into useful features:
+#### ⏳ Temporal Feature Extraction Engine (`src/datetime_pipeline.py`)
+Converts raw timestamps and session telemetry into rich time-series and behavioral features:
 
 ```text
-date
-day
-week
-month
-weekday
-hour
-week number
+Raw Timestamp ("2026-08-01 09:15:00")
+  │
+  ├── 1. Calendar Components ──► date ("2026-08-01"), year (2026), month (8), month_name ("August"), day (1)
+  │
+  ├── 2. Weekly & Day Pacing  ──► weekday (5), weekday_name ("Saturday"), is_weekend (1), week / week_number (31)
+  │
+  └── 3. Diurnal Activity     ──► hour (9), day_part ("Morning" / "Afternoon" / "Evening" / "Night")
 ```
 
-These features help identify learning patterns.
+#### 🛠️ Core Transformation Capabilities
+- **`parse_datetime_series(series, strip_timezone)`**: Robustly parses diverse date formats into UTC / timezone-naive `datetime64[ns]`, coercing corrupted records to `NaT` safely.
+- **`extract_datetime_features(df, col, prefix)`**: Automatically derives 12 standardized date/time attributes per timestamp column.
+- **`categorize_day_part(hour)`**: Classifies study times into behavioral buckets (`Morning`, `Afternoon`, `Evening`, `Night`).
+- **`calculate_session_duration_minutes(df)`**: Mathematically derives active study duration from `session_end - session_start`.
+- **`transform_entity_datetimes(df, entity_name)`**: Enriches sessions, students, and quizzes with time-series features for behavioral cohort analysis.
 
 ---
 
