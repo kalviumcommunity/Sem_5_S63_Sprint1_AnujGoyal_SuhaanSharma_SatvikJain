@@ -222,26 +222,55 @@ The project is intentionally designed to cover **all 50 concepts** from the Spri
 
 ### 01. Development Environment & Workspace Setup
 
-Set up:
+#### 🛠️ Setup Instructions
 
-* Python environment
-* VS Code
-* Git
-* Project folders
-* Virtual environment
-* Dependencies
+1. **Clone the Repository & Navigate to Workspace:**
+   ```bash
+   git clone <repository_url>
+   cd Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain
+   ```
 
-Example:
+2. **Create and Activate Python Virtual Environment:**
+   - **Windows (PowerShell):**
+     ```powershell
+     python -m venv .venv
+     .\.venv\Scripts\Activate.ps1
+     ```
+   - **Linux / macOS:**
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
 
-```text
-Python
-Pandas
-NumPy
-SQLite
-Plotly
-Streamlit
-Pytest
-```
+3. **Install Core Dependencies:**
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+4. **Verify Environment & Run Entry Point:**
+   ```bash
+   python main.py
+   ```
+
+5. **Run Automated Test Suite:**
+   ```bash
+   pytest
+   ```
+
+6. **Launch Streamlit Analytics Dashboard:**
+   ```bash
+   streamlit run dashboard/app.py
+   ```
+
+#### 📦 Core Tech Stack & Dependencies:
+- **Python**: `>=3.10` (Main programming & computation engine)
+- **Pandas**: `>=2.0.0` (DataFrames, transformations, aggregations)
+- **NumPy**: `>=1.24.0` (Vectorized numerical computations)
+- **SQLite3**: Built-in Python DB for SQL analytics layer
+- **Plotly**: `>=5.18.0` (Interactive charts and figures)
+- **Streamlit**: `>=1.30.0` (Interactive web UI and analytics dashboard)
+- **Pytest**: `>=7.4.0` (Automated testing and QA)
 
 ---
 
