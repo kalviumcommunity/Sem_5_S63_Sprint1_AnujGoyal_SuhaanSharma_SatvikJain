@@ -1,6 +1,6 @@
 """
 Python Data Workflow Foundations Pipeline.
-Orchestrates reusable loading, validating, inspecting, transforming, and saving of learning analytics data.
+Orchestrates reusable loading, validating, profiling, inspecting, transforming, and saving of learning analytics data.
 """
 
 from pathlib import Path
@@ -10,6 +10,7 @@ from src.utils import setup_logger, timed_step, ensure_directories_exist
 from src.ingestion import load_dataset, load_all_raw_data
 from src.validation import validate_intake_pipeline
 from src.inspection import inspect_dataframe
+from src.profiling import profile_dataset, DatasetProfile
 from src.transformation import standardize_column_names, cast_column_types, parse_datetime_columns
 from src.storage import save_dataframe, save_to_database
 
@@ -19,7 +20,7 @@ logger = setup_logger(__name__)
 class DataWorkflow:
     """
     Reusable data workflow orchestrator following the pipeline principle:
-    Load -> Validate -> Inspect -> Transform -> Export
+    Load -> Validate -> Profile/Inspect -> Transform -> Export
     """
 
     def __init__(self, name: str = "LearningAnalyticsWorkflow"):
@@ -27,6 +28,7 @@ class DataWorkflow:
         self.raw_data: Dict[str, pd.DataFrame] = {}
         self.validation_results: Dict[str, Any] = {}
         self.inspections: Dict[str, Dict[str, Any]] = {}
+        self.profiles: Dict[str, DatasetProfile] = {}
         self.transformed_data: Dict[str, pd.DataFrame] = {}
         ensure_directories_exist()
 
@@ -49,12 +51,14 @@ class DataWorkflow:
         self.validation_results = validate_intake_pipeline(self.raw_data, raise_on_error=raise_on_error)
         return self
 
-    @timed_step("Workflow Inspect Step")
+    @timed_step("Workflow Inspect & Profile Step")
     def inspect(self) -> "DataWorkflow":
-        """Performs structured data inspection on all loaded datasets."""
+        """Performs structured data inspection and quality profiling on all loaded datasets."""
         self.inspections = {}
+        self.profiles = {}
         for name, df in self.raw_data.items():
             self.inspections[name] = inspect_dataframe(df, dataset_name=name)
+            self.profiles[name] = profile_dataset(df, dataset_name=name)
         return self
 
     @timed_step("Workflow Transform Step")
@@ -132,6 +136,7 @@ class DataWorkflow:
             "validation_status": self.validation_results.get("status", "SKIPPED"),
             "datasets_loaded": list(self.raw_data.keys()),
             "datasets_inspected": list(self.inspections.keys()),
+            "datasets_profiled": list(self.profiles.keys()),
             "datasets_transformed": list(self.transformed_data.keys()),
             "saved_outputs": saved
         }

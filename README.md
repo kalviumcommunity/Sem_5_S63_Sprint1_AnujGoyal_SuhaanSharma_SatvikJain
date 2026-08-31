@@ -424,15 +424,29 @@ The ingestion layer enables seamless ingestion of both CSV and JSON student data
 
 ### 06. Dataset Profiling & Quality Assessment
 
-Generate a profile containing:
+#### 📊 Reusable Profiling Engine (`src/profiling.py`)
+The profiling engine generates structured quality assessments across all ingested datasets without modifying raw records:
 
-* Number of rows
-* Number of columns
-* Missing values
-* Unique values
-* Data types
-* Duplicate records
-* Numerical statistics
+```text
+Dataset Input
+  │
+  ├── 1. Volume & Memory Metrics ──► Rows, Columns, Total Cells, Memory Usage (MB)
+  │
+  ├── 2. Integrity & Quality     ──► Duplicate Counts, Missing Cell %, Completeness %, Quality Score (0-100)
+  │
+  ├── 3. Column-Level Profiles   ──► Data Types, Null Frequencies, Unique Counts, Top Sample Values
+  │
+  ├── 4. Numerical Summaries     ──► Mean, Std Dev, Min, 25%, Median (50%), 75%, Max
+  │
+  └── 5. Categorical Summaries   ──► Distinct Categories, Mode, Frequency Distribution
+```
+
+#### 📋 Structured Profiling Data Structures
+- **`DatasetProfile`**: Structured dataclass encapsulating all dimensional, column-level, and statistical indicators.
+- **`profile_dataset(df, dataset_name)`**: Generates a complete profile object for a single dataset.
+- **`profile_all_datasets(datasets)`**: Batch profiles all ingested entities.
+- **`generate_quality_scorecard(datasets)`**: Produces a consolidated comparative scorecard DataFrame ready for Streamlit dashboard display.
+- **`to_column_summary_df()` & `to_numerical_summary_df()`**: Formats profiling metadata into Pandas DataFrames for interactive tabular viewing.
 
 ---
 
