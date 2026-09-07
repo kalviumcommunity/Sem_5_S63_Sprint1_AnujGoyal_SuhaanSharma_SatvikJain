@@ -1,0 +1,4 @@
+order_id,customer_id,amount,status,order_year,order_month
+ORD006,C999,50.0,Pending,2023,4
+ORD007,C999,75.0,Pending,2024,7
+ORD008,C999,90.0,Pending,2024,11
