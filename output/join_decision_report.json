@@ -1,0 +1,27 @@
+{
+  "join_type": "left",
+  "left_table": "customers",
+  "right_table": "orders",
+  "join_key": "customer_id",
+  "left_rows": 1000,
+  "right_rows": 5000,
+  "result_rows": 5001,
+  "row_expansion": 4001,
+  "unmatched_left": 201,
+  "unmatched_right": 200,
+  "join_type_comparison": {
+    "inner": 4800,
+    "left": 5001,
+    "right": 5000,
+    "outer": 5201
+  },
+  "integrity": {
+    "conflict_columns": [],
+    "max_orders_per_customer": 16,
+    "avg_orders_per_customer": 5.0,
+    "customers_no_orders": 201,
+    "duplicate_order_rows": 0
+  },
+  "reasoning": "LEFT JOIN was chosen because the business requirement is customer-centric: every registered customer must appear in the output so that marketing, finance, and CRM teams can work from a complete customer universe. An INNER JOIN would silently drop 200 customers with no orders, making retention and churn KPIs unreliable. A RIGHT JOIN would drop the same 200 no-order customers while keeping 200 orphaned orders whose customer records don't exist \u2014 useful for data-quality audits but not for customer analytics. An OUTER JOIN preserves everything but requires downstream filtering and adds complexity without benefit for the primary use case. The join key 'customer_id' is the natural primary key of the customers table (guaranteed unique) and a foreign key in the orders table (one customer : many orders), making it the correct granularity anchor.",
+  "key_selection_reasoning": "customer_id is the stable, system-assigned identifier for each customer record. It avoids the ambiguity of natural keys (name, email) which can change or be duplicated. The 1:N relationship (one customer, many orders) is expected and intentional \u2014 the merge expansion from 1 000 to 4 800+ rows reflects real transactional data, not a Cartesian product bug."
+}
