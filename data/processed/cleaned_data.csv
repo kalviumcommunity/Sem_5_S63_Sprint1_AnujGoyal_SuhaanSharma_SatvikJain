@@ -1,0 +1,17 @@
+customer_id,name,email,amount,quantity,category,region,last_updated,status_date
+1,Alice,alice@example.com,100.0,2.0,Electronics,North,2024-01-10,2024-01-10
+3,Alice,alice@example.com,100.0,2.0,Electronics,North,2024-01-12,2024-01-12
+4,Alice,charlie@example.com,500.0,5.0,Electronics,East,2024-01-13,2024-01-12
+6,Eve,eve@example.com,310.0,1.0,Clothing,North,2024-01-13,2024-01-15
+7,Frank,frank@example.com,320.0,2.5,Electronics,South,2024-01-16,2024-01-16
+8,Grace,grace@example.com,450.0,4.0,Electronics,East,2024-01-17,2024-01-17
+9,Hank,hank@example.com,180.0,2.0,Books,North,2024-01-18,2024-01-18
+10,Ivy,ivy@example.com,90.0,1.0,Clothing,West,2024-01-19,2024-01-19
+11,Alice,jane@example.com,310.0,3.0,Electronics,North,2024-01-20,2024-01-20
+13,Laura,laura@example.com,310.0,2.5,Clothing,East,2024-01-22,2024-01-22
+14,Mike,mike@example.com,275.0,4.0,Electronics,North,2024-01-23,2024-01-22
+15,Nancy,nancy@example.com,380.0,3.0,Books,West,2024-01-24,2024-01-24
+16,Alice,oscar@example.com,95.0,1.0,Electronics,North,2024-01-25,2024-01-25
+17,Paul,paul@example.com,420.0,5.0,Electronics,South,2024-01-26,2024-01-26
+19,Rose,rose@example.com,310.0,1.0,Books,West,2024-01-28,2024-01-28
+20,Sam,sam@example.com,330.0,3.0,Electronics,North,2024-01-29,2024-01-29
