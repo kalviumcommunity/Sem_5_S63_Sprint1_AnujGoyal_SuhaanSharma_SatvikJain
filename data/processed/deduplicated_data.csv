@@ -1,0 +1,9 @@
+amount,status,email
+100,completed,alice@example.com
+250,pending,bob@example.com
+150,completed,carol@example.com
+300,completed,dave@example.com
+80,pending,eve@example.com
+500,completed,frank@example.com
+120,completed,grace@example.com
+200,pending,henry@example.com
