@@ -29,3 +29,13 @@ def get_business_kpis(db_path: Any = None) -> Dict[str, Any]:
     metrics_result = execute_business_metrics(db_path=db_path)
     return metrics_result.get("kpis", {})
 
+
+def run_aggregation_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
+    """
+    Executes SQL filtering, grouping, and aggregation queries for deep cohort analysis.
+    """
+    from src.database import execute_aggregation_queries
+
+    return execute_aggregation_queries(db_path=db_path)
+
+
