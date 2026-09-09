@@ -560,6 +560,136 @@ def validate_views_against_pandas(
     return report
 
 
+def validate_sql_insights_against_pandas(
+    db_path: Optional[Path] = None,
+    datasets: Optional[dict] = None,
+    tolerance: float = 1e-2
+) -> dict:
+    """
+    Validates core SQL business metrics against equivalent Pandas DataFrame calculations.
+
+    Metrics compared:
+    - total_students
+    - completion_rate_pct
+    - dropout_rate_pct
+    - active_learner_count
+    - avg_quiz_score_pct
+    - avg_session_duration_minutes
+    - at_risk_learner_count
+
+    Args:
+        db_path: Path to SQLite database
+        datasets: Dictionary mapping table name -> pd.DataFrame
+        tolerance: Allowed floating-point absolute difference tolerance
+
+    Returns:
+        Validation report dictionary containing comparison table, status, and discrepancies.
+    """
+    target_db = db_path or DB_PATH
+    sql_metrics = execute_business_metrics(db_path=target_db).get("kpis", {})
+
+    if datasets is None:
+        datasets = {
+            "students": query_to_dataframe("SELECT * FROM students;", db_path=target_db),
+            "sessions": query_to_dataframe("SELECT * FROM sessions;", db_path=target_db),
+            "quizzes": query_to_dataframe("SELECT * FROM quizzes;", db_path=target_db),
+            "behavioural_features": query_to_dataframe("SELECT * FROM behavioural_features;", db_path=target_db)
+        }
+
+    students = datasets.get("students", pd.DataFrame())
+    sessions = datasets.get("sessions", pd.DataFrame())
+    quizzes = datasets.get("quizzes", pd.DataFrame())
+    behavioural_features = datasets.get("behavioural_features", pd.DataFrame())
+
+    pandas_metrics = {}
+
+    # 1. Total Students & Completion Rate %
+    if not students.empty and "completion_status" in students.columns:
+        tot_students = len(students)
+        comp_count = (students["completion_status"].astype(str).str.lower() == "completed").sum()
+        pandas_metrics["total_students"] = tot_students
+        pandas_metrics["completion_rate_pct"] = round(100.0 * comp_count / max(tot_students, 1), 2)
+    else:
+        pandas_metrics["total_students"] = 0
+        pandas_metrics["completion_rate_pct"] = 0.0
+
+    # 2. Dropout Rate %
+    if not students.empty and "completion_status" in students.columns:
+        tot_students = len(students)
+        drop_count = (students["completion_status"].astype(str).str.lower() == "dropped").sum()
+        pandas_metrics["dropout_rate_pct"] = round(100.0 * drop_count / max(tot_students, 1), 2)
+    else:
+        pandas_metrics["dropout_rate_pct"] = 0.0
+
+    # 3. Active Learner Count
+    if not sessions.empty and "student_id" in sessions.columns:
+        pandas_metrics["active_learner_count"] = int(sessions["student_id"].nunique())
+    else:
+        pandas_metrics["active_learner_count"] = 0
+
+    # 4. Average Quiz Score %
+    if not quizzes.empty and "score_percentage" in quizzes.columns:
+        pandas_metrics["avg_quiz_score_pct"] = round(float(quizzes["score_percentage"].mean()), 2)
+    else:
+        pandas_metrics["avg_quiz_score_pct"] = 0.0
+
+    # 5. Average Session Duration (minutes)
+    if not sessions.empty and "duration_minutes" in sessions.columns:
+        pandas_metrics["avg_session_duration_minutes"] = round(float(sessions["duration_minutes"].mean()), 2)
+    else:
+        pandas_metrics["avg_session_duration_minutes"] = 0.0
+
+    # 6. At-Risk Learner Count
+    if not behavioural_features.empty and "dropout_risk_level" in behavioural_features.columns:
+        at_risk_mask = behavioural_features["dropout_risk_level"].astype(str).str.lower().isin(["high", "critical"])
+        pandas_metrics["at_risk_learner_count"] = int(at_risk_mask.sum())
+    else:
+        pandas_metrics["at_risk_learner_count"] = 0
+
+    comparison_results = {}
+    is_valid = True
+    discrepancies = []
+
+    metrics_to_compare = [
+        "total_students",
+        "completion_rate_pct",
+        "dropout_rate_pct",
+        "active_learner_count",
+        "avg_quiz_score_pct",
+        "avg_session_duration_minutes",
+        "at_risk_learner_count"
+    ]
+
+    for metric in metrics_to_compare:
+        sql_val = sql_metrics.get(metric, 0.0)
+        pd_val = pandas_metrics.get(metric, 0.0)
+        delta = round(abs(float(sql_val) - float(pd_val)), 4)
+        match = (delta <= tolerance)
+
+        comparison_results[metric] = {
+            "sql_value": sql_val,
+            "pandas_value": pd_val,
+            "absolute_difference": delta,
+            "match": match
+        }
+
+        if not match:
+            is_valid = False
+            discrepancies.append(f"Metric '{metric}' mismatch: SQL={sql_val}, Pandas={pd_val} (delta={delta})")
+
+    report = {
+        "status": "VALID" if is_valid else "INVALID",
+        "tolerance": tolerance,
+        "metrics_compared": len(metrics_to_compare),
+        "comparison_results": comparison_results,
+        "discrepancies": discrepancies
+    }
+
+    logger.info(f"SQL vs Pandas insight validation complete. Status: {report['status']}")
+    return report
+
+
+
 
 
 
