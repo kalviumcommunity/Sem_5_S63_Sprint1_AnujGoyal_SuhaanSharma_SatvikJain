@@ -224,21 +224,37 @@ def execute_business_metrics(
     return results
 
 
+
+def execute_multi_table_joins(
+
 def execute_aggregation_queries(
+
     db_path: Optional[Path] = None,
     sql_file_path: Optional[Path] = None
 ) -> dict:
     """
+
+    Executes multi-table INNER and LEFT JOIN queries from sql/multi_table_joins.sql against SQLite.
+
+    Args:
+        db_path: Path to SQLite database file
+        sql_file_path: Custom path to multi_table_joins.sql
+
     Executes SQL filtering, grouping, and aggregation queries from sql/aggregation.sql against SQLite.
 
     Args:
         db_path: Path to SQLite database file
         sql_file_path: Custom path to aggregation.sql
 
+
     Returns:
         Dictionary mapping query_name -> pd.DataFrame
     """
+
+    target_sql = sql_file_path or (SQL_DIR / "multi_table_joins.sql")
+
     target_sql = sql_file_path or (SQL_DIR / "aggregation.sql")
+
     queries = load_sql_queries_from_file(target_sql)
     target_db = db_path or DB_PATH
 
@@ -249,12 +265,43 @@ def execute_aggregation_queries(
         try:
             df = query_to_dataframe(query_str, db_path=target_db)
             results[name] = df
+
+            logger.info(f"Successfully executed multi-table join query '{name}' ({len(df)} rows returned).")
+        except Exception as e:
+            logger.error(f"Failed executing multi-table join query '{name}': {e}")
+
             logger.info(f"Successfully executed aggregation query '{name}' ({len(df)} rows returned).")
         except Exception as e:
             logger.error(f"Failed executing aggregation query '{name}': {e}")
+
             results[name] = pd.DataFrame()
 
     return results
+
+
+
+def validate_join_expansion_integrity(db_path: Optional[Path] = None) -> dict:
+    """
+    Validates that multi-table JOIN operations maintain 1.00x expansion factor without record duplication.
+    """
+    results = execute_multi_table_joins(db_path=db_path)
+    val_df = results.get("join_duplication_validation", pd.DataFrame())
+
+    if not val_df.empty:
+        row = val_df.iloc[0].to_dict()
+        return {
+            "base_students_count": int(row.get("base_students_count", 0)),
+            "joined_records_count": int(row.get("joined_records_count", 0)),
+            "join_integrity_status": str(row.get("join_integrity_status", "UNKNOWN")),
+            "expansion_factor": float(row.get("expansion_factor", 1.0))
+        }
+    return {
+        "base_students_count": 0,
+        "joined_records_count": 0,
+        "join_integrity_status": "UNKNOWN",
+        "expansion_factor": 1.0
+    }
+
 
 
 

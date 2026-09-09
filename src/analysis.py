@@ -30,6 +30,15 @@ def get_business_kpis(db_path: Any = None) -> Dict[str, Any]:
     return metrics_result.get("kpis", {})
 
 
+
+def run_multi_table_join_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
+    """
+    Executes multi-table INNER and LEFT JOIN queries combining students, courses, sessions, quizzes, and features.
+    """
+    from src.database import execute_multi_table_joins
+
+    return execute_multi_table_joins(db_path=db_path)
+
 def run_aggregation_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
     """
     Executes SQL filtering, grouping, and aggregation queries for deep cohort analysis.
@@ -37,5 +46,6 @@ def run_aggregation_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
     from src.database import execute_aggregation_queries
 
     return execute_aggregation_queries(db_path=db_path)
+
 
 
