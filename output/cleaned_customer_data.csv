@@ -1,0 +1,16 @@
+customer_id,product_name,segment,location,sales_rep
+C001,Electronics,B2B,sao paulo,john doe
+C002,Electronics,B2B,so paulo,john doe
+C003,Electronics,B2B,montral,john doe
+C004,Electronics,B2B,montreal,jane smith
+C005,Home Appliances,B2B,new york,jane smith
+C006,Home Appliances,B2B,new york,jane smith
+C007,Home Appliances,SMB,bogot,jane smith
+C008,Home Appliances,SMB,mxico city,bob johnson
+C009,Clothing,SMB,mnchen,bob johnson
+C010,Clothing,SMB,munich,bob johnson
+C011,Clothing,Enterprise,zrich,bob johnson
+C012,Clothing,Enterprise,new delhi,alice brown
+C013,Sports & Outdoor,Enterprise,krakw,alice brown
+C014,Sports & Outdoor,Enterprise,montreal,alice brown
+C015,Sports & Outdoor,B2B,new york,alice brown
