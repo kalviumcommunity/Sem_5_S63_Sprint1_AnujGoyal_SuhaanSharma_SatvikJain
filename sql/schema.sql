@@ -70,3 +70,21 @@ CREATE TABLE IF NOT EXISTS student_behaviour_summary (
     completed INTEGER DEFAULT 0,
     FOREIGN KEY (student_id) REFERENCES students(student_id)
 );
+
+-- Behavioural Features Table
+CREATE TABLE IF NOT EXISTS behavioural_features (
+    student_id TEXT PRIMARY KEY,
+    average_session_duration REAL DEFAULT 0,
+    sessions_per_week REAL DEFAULT 0,
+    quiz_average REAL DEFAULT 0,
+    quiz_attempt_count INTEGER DEFAULT 0,
+    course_progress REAL DEFAULT 0,
+    progress_velocity REAL DEFAULT 0,
+    days_since_last_activity INTEGER DEFAULT 0,
+    learning_consistency REAL DEFAULT 0,
+    engagement_score REAL DEFAULT 0,
+    completion_rate REAL DEFAULT 0,
+    dropout_risk_level TEXT DEFAULT 'Low',
+    FOREIGN KEY (student_id) REFERENCES students(student_id)
+);
+
