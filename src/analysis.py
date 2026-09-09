@@ -18,3 +18,14 @@ def generate_summary_statistics(df: pd.DataFrame) -> Dict[str, Any]:
         "shape": df.shape,
         "dtypes": df.dtypes.astype(str).to_dict()
     }
+
+
+def get_business_kpis(db_path: Any = None) -> Dict[str, Any]:
+    """
+    Retrieves core executive KPIs and business metrics from SQLite analytics layer.
+    """
+    from src.database import execute_business_metrics
+
+    metrics_result = execute_business_metrics(db_path=db_path)
+    return metrics_result.get("kpis", {})
+

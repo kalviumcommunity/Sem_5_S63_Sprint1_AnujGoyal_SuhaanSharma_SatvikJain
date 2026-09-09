@@ -128,6 +128,16 @@ def engineer_behavioral_features(
     )
     df["engagement_score"] = engagement.clip(0.0, 100.0).round(2)
 
+    # 12. Dropout Risk Score and Risk Level
+    from src.vectorization import compute_vectorized_dropout_risk, classify_risk_tier
+    risk_scores = compute_vectorized_dropout_risk(
+        df["engagement_score"].to_numpy(),
+        df["days_since_last_activity"].to_numpy(),
+        quiz_p_rate.to_numpy()
+    ).round(2)
+    df["dropout_risk_score"] = risk_scores
+    df["dropout_risk_level"] = classify_risk_tier(risk_scores)
+
     logger.info(
         f"Successfully engineered {len(FEATURE_FORMULAS)} behavioral features across {len(df)} learners "
         f"(Mean Engagement: {df['engagement_score'].mean():.1f}/100, Mean Velocity: {df['progress_velocity'].mean():.1f}%/wk)"
