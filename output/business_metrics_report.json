@@ -1,0 +1,50 @@
+{
+  "database_path": "C:\\Users\\91730\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
+  "kpi_summary": {
+    "total_students": 50.0,
+    "completion_rate_pct": 42.0,
+    "dropout_rate_pct": 20.0,
+    "avg_quiz_score_pct": 75.2,
+    "avg_session_duration_minutes": 69.4,
+    "active_learner_count": 45.0,
+    "at_risk_learner_count": 8.0
+  },
+  "category_breakdown": [
+    {
+      "category": "Database",
+      "total_enrolled": 16,
+      "completed_count": 8,
+      "completion_rate_pct": 50.0,
+      "avg_quiz_score": 75.45,
+      "avg_session_duration": 68.22,
+      "at_risk_count": 0
+    },
+    {
+      "category": "AI",
+      "total_enrolled": 13,
+      "completed_count": 6,
+      "completion_rate_pct": 46.15,
+      "avg_quiz_score": 56.99,
+      "avg_session_duration": 68.52,
+      "at_risk_count": 4
+    },
+    {
+      "category": "Development",
+      "total_enrolled": 11,
+      "completed_count": 2,
+      "completion_rate_pct": 18.18,
+      "avg_quiz_score": 59.95,
+      "avg_session_duration": 60.99,
+      "at_risk_count": 2
+    },
+    {
+      "category": "Data Science",
+      "total_enrolled": 10,
+      "completed_count": 5,
+      "completion_rate_pct": 50.0,
+      "avg_quiz_score": 76.75,
+      "avg_session_duration": 54.1,
+      "at_risk_count": 2
+    }
+  ]
+}

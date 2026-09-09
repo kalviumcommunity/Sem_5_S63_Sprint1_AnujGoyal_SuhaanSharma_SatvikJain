@@ -128,3 +128,99 @@ def validate_database_insertion(
     logger.info(f"Database validation complete. Status: {report['status']}")
     return report
 
+
+def load_sql_queries_from_file(sql_file_path: Optional[Path] = None) -> dict:
+    """
+    Parses a SQL script file annotated with '-- Name: query_name' into a dictionary of named queries.
+
+    Args:
+        sql_file_path: Path to the SQL file (defaults to sql/business_metrics.sql)
+
+    Returns:
+        Dictionary mapping query_name -> sql_query_string
+    """
+    target_file = sql_file_path or (SQL_DIR / "business_metrics.sql")
+    if not target_file.exists():
+        logger.warning(f"SQL metrics query file not found at {target_file}")
+        return {}
+
+    with open(target_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    queries = {}
+    current_name = None
+    current_lines = []
+
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("-- Name:"):
+            if current_name and current_lines:
+                raw_sql = "\n".join(current_lines).strip()
+                if ";" in raw_sql:
+                    raw_sql = raw_sql[:raw_sql.rfind(";")+1].strip()
+                queries[current_name] = raw_sql
+                current_lines = []
+            current_name = stripped.replace("-- Name:", "").strip()
+        elif current_name:
+            if stripped.startswith("--") and current_lines and any(";" in l for l in current_lines):
+                continue
+            current_lines.append(line)
+
+    if current_name and current_lines:
+        raw_sql = "\n".join(current_lines).strip()
+        if ";" in raw_sql:
+            raw_sql = raw_sql[:raw_sql.rfind(";")+1].strip()
+        queries[current_name] = raw_sql
+
+    logger.info(f"Loaded {len(queries)} named SQL queries from {target_file.name}")
+    return queries
+
+
+def execute_business_metrics(
+    db_path: Optional[Path] = None,
+    sql_file_path: Optional[Path] = None
+) -> dict:
+    """
+    Executes core business metric queries from sql/business_metrics.sql against SQLite.
+
+    Args:
+        db_path: Path to SQLite database file
+        sql_file_path: Custom path to business_metrics.sql
+
+    Returns:
+        Dictionary containing KPI metrics, executive summary DataFrame, and category breakdown DataFrame
+    """
+    queries = load_sql_queries_from_file(sql_file_path)
+    target_db = db_path or DB_PATH
+
+    results = {
+        "kpis": {},
+        "raw_results": {},
+        "category_breakdown": pd.DataFrame()
+    }
+
+    for name, query_str in queries.items():
+        if not query_str.endswith(";"):
+            query_str += ";"
+        try:
+            df = query_to_dataframe(query_str, db_path=target_db)
+            results["raw_results"][name] = df
+
+            # Populate top-level KPI metrics dictionary if single-row result
+            if name == "executive_kpi_overview" and not df.empty:
+                row = df.iloc[0].to_dict()
+                results["kpis"] = row
+            elif name == "metrics_by_category":
+                results["category_breakdown"] = df
+            elif not df.empty and len(df) == 1:
+                row_dict = df.iloc[0].to_dict()
+                results["kpis"].update(row_dict)
+
+        except Exception as e:
+            logger.error(f"Failed executing SQL metric query '{name}': {e}")
+            results["raw_results"][name] = pd.DataFrame()
+
+    logger.info(f"Executed business metric queries successfully against database.")
+    return results
+
+
