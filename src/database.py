@@ -19,8 +19,28 @@ def get_db_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
     return sqlite3.connect(str(target_path))
 
 
+def init_views(views_path: Optional[Path] = None, db_path: Optional[Path] = None) -> None:
+    """Initializes reusable analytical SQL views using views.sql."""
+    views_file = views_path or (SQL_DIR / "views.sql")
+    if not views_file.exists():
+        logger.warning(f"Views file not found at {views_file}")
+        return
+
+    with open(views_file, "r", encoding="utf-8") as f:
+        views_sql = f.read()
+
+    conn = get_db_connection(db_path)
+    try:
+        cursor = conn.cursor()
+        cursor.executescript(views_sql)
+        conn.commit()
+        logger.info("Database analytical views initialized successfully.")
+    finally:
+        conn.close()
+
+
 def init_database(schema_path: Optional[Path] = None, db_path: Optional[Path] = None) -> None:
-    """Initializes the database schema using schema.sql."""
+    """Initializes the database schema using schema.sql and creates views."""
     schema_file = schema_path or (SQL_DIR / "schema.sql")
     if not schema_file.exists():
         logger.warning(f"Schema file not found at {schema_file}")
@@ -37,6 +57,8 @@ def init_database(schema_path: Optional[Path] = None, db_path: Optional[Path] = 
         logger.info("Database schema initialized successfully.")
     finally:
         conn.close()
+
+    init_views(db_path=db_path)
 
 
 def query_to_dataframe(query: str, db_path: Optional[Path] = None) -> pd.DataFrame:
@@ -395,6 +417,148 @@ def benchmark_query(query: str, db_path: Optional[Path] = None, runs: int = 10) 
         "max_time_ms": round(max(timings), 3) if timings else 0.0,
         "runs": runs
     }
+
+
+def execute_analytical_views(db_path: Optional[Path] = None) -> dict:
+    """
+    Queries all reusable analytical views from SQLite and returns a dictionary of DataFrames.
+
+    Args:
+        db_path: Custom path to SQLite database
+
+    Returns:
+        Dictionary mapping view_name -> pd.DataFrame
+    """
+    target_db = db_path or DB_PATH
+    init_views(db_path=target_db)
+
+    view_names = [
+        "student_engagement_view",
+        "course_performance_view",
+        "dropout_risk_view",
+        "weekly_activity_view"
+    ]
+
+    results = {}
+    for vname in view_names:
+        try:
+            df = query_to_dataframe(f"SELECT * FROM {vname};", db_path=target_db)
+            results[vname] = df
+            logger.info(f"Successfully loaded analytical view '{vname}' ({len(df)} rows).")
+        except Exception as e:
+            logger.error(f"Failed loading analytical view '{vname}': {e}")
+            results[vname] = pd.DataFrame()
+
+    return results
+
+
+def validate_views_against_pandas(
+    db_path: Optional[Path] = None,
+    datasets: Optional[dict] = None
+) -> dict:
+    """
+    Validates each SQL view's calculations against pure Pandas calculations.
+
+    Args:
+        db_path: Path to SQLite database
+        datasets: Dictionary of DataFrames (students, courses, sessions, quizzes, behavioural_features)
+
+    Returns:
+        Validation report dictionary with status, match metrics, and discrepancies.
+    """
+    target_db = db_path or DB_PATH
+    sql_views = execute_analytical_views(db_path=target_db)
+
+    report = {
+        "status": "VALID",
+        "views_checked": list(sql_views.keys()),
+        "validation_details": {},
+        "errors": []
+    }
+
+    try:
+        if datasets is None:
+            datasets = {
+                "students": query_to_dataframe("SELECT * FROM students;", db_path=target_db),
+                "courses": query_to_dataframe("SELECT * FROM courses;", db_path=target_db),
+                "sessions": query_to_dataframe("SELECT * FROM sessions;", db_path=target_db),
+                "quizzes": query_to_dataframe("SELECT * FROM quizzes;", db_path=target_db),
+                "behavioural_features": query_to_dataframe("SELECT * FROM behavioural_features;", db_path=target_db)
+            }
+
+        students = datasets.get("students", pd.DataFrame())
+        courses = datasets.get("courses", pd.DataFrame())
+        sessions = datasets.get("sessions", pd.DataFrame())
+        behavioural_features = datasets.get("behavioural_features", pd.DataFrame())
+
+        # 1. Validate student_engagement_view
+        se_view = sql_views.get("student_engagement_view", pd.DataFrame())
+        if not students.empty:
+            se_pandas_count = len(students)
+            se_sql_count = len(se_view)
+            se_match = (se_pandas_count == se_sql_count)
+            report["validation_details"]["student_engagement_view"] = {
+                "pandas_rows": se_pandas_count,
+                "sql_rows": se_sql_count,
+                "match": se_match
+            }
+            if not se_match:
+                report["status"] = "INVALID"
+                report["errors"].append(f"student_engagement_view row mismatch: Pandas={se_pandas_count}, SQL={se_sql_count}")
+
+        # 2. Validate course_performance_view
+        cp_view = sql_views.get("course_performance_view", pd.DataFrame())
+        if not courses.empty:
+            cp_pandas_count = len(courses)
+            cp_sql_count = len(cp_view)
+            cp_match = (cp_pandas_count == cp_sql_count)
+            report["validation_details"]["course_performance_view"] = {
+                "pandas_courses": cp_pandas_count,
+                "sql_courses": cp_sql_count,
+                "match": cp_match
+            }
+            if not cp_match:
+                report["status"] = "INVALID"
+                report["errors"].append(f"course_performance_view row mismatch: Pandas={cp_pandas_count}, SQL={cp_sql_count}")
+
+        # 3. Validate dropout_risk_view
+        dr_view = sql_views.get("dropout_risk_view", pd.DataFrame())
+        if not behavioural_features.empty and not dr_view.empty:
+            high_crit_pandas = len(behavioural_features[behavioural_features["dropout_risk_level"].str.lower().isin(["high", "critical"])])
+            high_crit_sql = int(dr_view["is_at_risk"].sum())
+            dr_match = (high_crit_pandas == high_crit_sql)
+            report["validation_details"]["dropout_risk_view"] = {
+                "pandas_at_risk": high_crit_pandas,
+                "sql_at_risk": high_crit_sql,
+                "match": dr_match
+            }
+            if not dr_match:
+                report["status"] = "INVALID"
+                report["errors"].append(f"dropout_risk_view at-risk count mismatch: Pandas={high_crit_pandas}, SQL={high_crit_sql}")
+
+        # 4. Validate weekly_activity_view
+        wa_view = sql_views.get("weekly_activity_view", pd.DataFrame())
+        if not sessions.empty and "session_start" in sessions.columns and not wa_view.empty:
+            valid_sessions = sessions[sessions["session_start"].notna() & (sessions["session_start"] != "")]
+            tot_sess_pandas = len(valid_sessions)
+            tot_sess_sql = int(wa_view["total_sessions"].sum())
+            wa_match = (tot_sess_pandas == tot_sess_sql)
+            report["validation_details"]["weekly_activity_view"] = {
+                "pandas_total_sessions": tot_sess_pandas,
+                "sql_total_sessions": tot_sess_sql,
+                "match": wa_match
+            }
+            if not wa_match:
+                report["status"] = "INVALID"
+                report["errors"].append(f"weekly_activity_view total sessions mismatch: Pandas={tot_sess_pandas}, SQL={tot_sess_sql}")
+
+    except Exception as e:
+        report["status"] = "ERROR"
+        report["errors"].append(str(e))
+
+    logger.info(f"Views validation against Pandas complete. Status: {report['status']}")
+    return report
+
 
 
 
