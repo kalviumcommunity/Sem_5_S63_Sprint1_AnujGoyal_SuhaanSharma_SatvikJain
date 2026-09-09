@@ -1,0 +1,31 @@
+{
+  "database_path": "C:\\Users\\91730\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
+  "status": "VALID",
+  "inserted_records": {
+    "students": 50,
+    "courses": 4,
+    "sessions": 150,
+    "quizzes": 100,
+    "behavioural_features": 50
+  },
+  "validation_report": {
+    "status": "VALID",
+    "existing_tables": [
+      "sessions",
+      "behavioural_features",
+      "student_behaviour_summary",
+      "courses",
+      "students",
+      "quizzes"
+    ],
+    "missing_tables": [],
+    "table_row_counts": {
+      "students": 50,
+      "courses": 4,
+      "sessions": 150,
+      "quizzes": 100,
+      "behavioural_features": 50
+    },
+    "errors": []
+  }
+}
