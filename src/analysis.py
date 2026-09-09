@@ -49,3 +49,14 @@ def run_aggregation_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
 
 
 
+def run_window_function_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
+    """
+    Executes SQL window functions (ROW_NUMBER, RANK, LAG, LEAD, AVG OVER) for ranking, progression, and rolling metrics.
+    """
+    from src.database import execute_window_function_queries
+
+    return execute_window_function_queries(db_path=db_path)
+
+
+
+

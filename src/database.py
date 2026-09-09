@@ -279,6 +279,40 @@ def execute_aggregation_queries(
     return results
 
 
+def execute_window_function_queries(
+    db_path: Optional[Path] = None,
+    sql_file_path: Optional[Path] = None
+) -> dict:
+    """
+    Executes SQL window function queries from sql/window_functions.sql against SQLite.
+
+    Args:
+        db_path: Path to SQLite database file
+        sql_file_path: Custom path to window_functions.sql
+
+    Returns:
+        Dictionary mapping query_name -> pd.DataFrame
+    """
+    target_sql = sql_file_path or (SQL_DIR / "window_functions.sql")
+    queries = load_sql_queries_from_file(target_sql)
+    target_db = db_path or DB_PATH
+
+    results = {}
+    for name, query_str in queries.items():
+        if not query_str.endswith(";"):
+            query_str += ";"
+        try:
+            df = query_to_dataframe(query_str, db_path=target_db)
+            results[name] = df
+            logger.info(f"Successfully executed window function query '{name}' ({len(df)} rows returned).")
+        except Exception as e:
+            logger.error(f"Failed executing window function query '{name}': {e}")
+            results[name] = pd.DataFrame()
+
+    return results
+
+
+
 
 def validate_join_expansion_integrity(db_path: Optional[Path] = None) -> dict:
     """
