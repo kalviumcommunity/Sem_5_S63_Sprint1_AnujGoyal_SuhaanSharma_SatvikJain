@@ -1,0 +1,253 @@
+{
+  "database_path": "C:\\Users\\91730\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
+  "executed_queries": [
+    "course_performance_analysis",
+    "learner_segment_analysis",
+    "high_inactivity_risk_analysis",
+    "age_demographic_engagement",
+    "quiz_performance_aggregation"
+  ],
+  "results": {
+    "course_performance_analysis": [
+      {
+        "category": "Development",
+        "course_title": "Web Development",
+        "total_enrolled": 11,
+        "completed_count": 2,
+        "dropped_count": 3,
+        "completion_rate_pct": 18.18,
+        "avg_engagement_score": 40.01,
+        "avg_course_progress": 25.0
+      },
+      {
+        "category": "AI",
+        "course_title": "Machine Learning Fundamentals",
+        "total_enrolled": 13,
+        "completed_count": 6,
+        "dropped_count": 4,
+        "completion_rate_pct": 46.15,
+        "avg_engagement_score": 35.06,
+        "avg_course_progress": 16.35
+      },
+      {
+        "category": "Data Science",
+        "course_title": "Python for Data Science",
+        "total_enrolled": 10,
+        "completed_count": 5,
+        "dropped_count": 2,
+        "completion_rate_pct": 50.0,
+        "avg_engagement_score": 37.17,
+        "avg_course_progress": 25.0
+      },
+      {
+        "category": "Database",
+        "course_title": "SQL Database Analytics",
+        "total_enrolled": 16,
+        "completed_count": 8,
+        "dropped_count": 1,
+        "completion_rate_pct": 50.0,
+        "avg_engagement_score": 50.48,
+        "avg_course_progress": 40.0
+      }
+    ],
+    "learner_segment_analysis": [
+      {
+        "device_type": "Laptop",
+        "education_level": "High School",
+        "student_count": 2,
+        "completed_count": 1,
+        "avg_session_mins": 37.63,
+        "avg_quiz_score": 78.73,
+        "avg_engagement": 66.78
+      },
+      {
+        "device_type": "Desktop",
+        "education_level": "Postgraduate",
+        "student_count": 2,
+        "completed_count": 0,
+        "avg_session_mins": 101.05,
+        "avg_quiz_score": 64.93,
+        "avg_engagement": 54.3
+      },
+      {
+        "device_type": "Mobile",
+        "education_level": "Postgraduate",
+        "student_count": 3,
+        "completed_count": 1,
+        "avg_session_mins": 65.47,
+        "avg_quiz_score": 69.98,
+        "avg_engagement": 44.03
+      },
+      {
+        "device_type": "Desktop",
+        "education_level": "High School",
+        "student_count": 8,
+        "completed_count": 4,
+        "avg_session_mins": 55.9,
+        "avg_quiz_score": 70.26,
+        "avg_engagement": 43.41
+      },
+      {
+        "device_type": "Mobile",
+        "education_level": "Undergraduate",
+        "student_count": 4,
+        "completed_count": 0,
+        "avg_session_mins": 45.33,
+        "avg_quiz_score": 67.45,
+        "avg_engagement": 41.06
+      },
+      {
+        "device_type": "Mobile",
+        "education_level": "High School",
+        "student_count": 2,
+        "completed_count": 2,
+        "avg_session_mins": 30.68,
+        "avg_quiz_score": 76.06,
+        "avg_engagement": 40.39
+      },
+      {
+        "device_type": "Desktop",
+        "education_level": "Undergraduate",
+        "student_count": 5,
+        "completed_count": 2,
+        "avg_session_mins": 74.75,
+        "avg_quiz_score": 62.32,
+        "avg_engagement": 39.64
+      },
+      {
+        "device_type": "Laptop",
+        "education_level": "Postgraduate",
+        "student_count": 3,
+        "completed_count": 3,
+        "avg_session_mins": 66.67,
+        "avg_quiz_score": 75.52,
+        "avg_engagement": 39.57
+      },
+      {
+        "device_type": "Laptop",
+        "education_level": "Undergraduate",
+        "student_count": 3,
+        "completed_count": 3,
+        "avg_session_mins": 74.39,
+        "avg_quiz_score": 86.27,
+        "avg_engagement": 39.57
+      },
+      {
+        "device_type": "Tablet",
+        "education_level": "Postgraduate",
+        "student_count": 3,
+        "completed_count": 3,
+        "avg_session_mins": 80.04,
+        "avg_quiz_score": 54.1,
+        "avg_engagement": 36.35
+      },
+      {
+        "device_type": "Tablet",
+        "education_level": "Undergraduate",
+        "student_count": 5,
+        "completed_count": 2,
+        "avg_session_mins": 75.5,
+        "avg_quiz_score": 65.08,
+        "avg_engagement": 32.86
+      }
+    ],
+    "high_inactivity_risk_analysis": [
+      {
+        "target_course_id": "C002",
+        "category": "Database",
+        "student_count": 16,
+        "avg_days_inactive": 16.2,
+        "avg_quiz_score": 75.45,
+        "high_risk_students": 0
+      },
+      {
+        "target_course_id": "C003",
+        "category": "AI",
+        "student_count": 13,
+        "avg_days_inactive": 15.8,
+        "avg_quiz_score": 56.99,
+        "high_risk_students": 4
+      },
+      {
+        "target_course_id": "C001",
+        "category": "Data Science",
+        "student_count": 10,
+        "avg_days_inactive": 14.6,
+        "avg_quiz_score": 76.75,
+        "high_risk_students": 2
+      },
+      {
+        "target_course_id": "C004",
+        "category": "Development",
+        "student_count": 11,
+        "avg_days_inactive": 14.2,
+        "avg_quiz_score": 59.95,
+        "high_risk_students": 2
+      }
+    ],
+    "age_demographic_engagement": [
+      {
+        "age_group": "22-30",
+        "student_count": 14,
+        "completed_students": 8,
+        "avg_weekly_sessions": 0.41,
+        "avg_session_duration": 66.97,
+        "avg_engagement": 42.75
+      },
+      {
+        "age_group": "Over 30",
+        "student_count": 29,
+        "completed_students": 12,
+        "avg_weekly_sessions": 0.37,
+        "avg_session_duration": 65.84,
+        "avg_engagement": 41.81
+      },
+      {
+        "age_group": "Under 22",
+        "student_count": 7,
+        "completed_students": 1,
+        "avg_weekly_sessions": 0.34,
+        "avg_session_duration": 49.64,
+        "avg_engagement": 37.75
+      }
+    ],
+    "quiz_performance_aggregation": [
+      {
+        "course_id": "C004",
+        "course_title": "Web Development",
+        "total_attempts": 20,
+        "total_passed": 12,
+        "quiz_pass_rate_pct": 60.0,
+        "avg_score_percentage": 75.18,
+        "avg_time_taken_mins": 27.27
+      },
+      {
+        "course_id": "C002",
+        "course_title": "SQL Database Analytics",
+        "total_attempts": 31,
+        "total_passed": 24,
+        "quiz_pass_rate_pct": 77.42,
+        "avg_score_percentage": 76.54,
+        "avg_time_taken_mins": 26.95
+      },
+      {
+        "course_id": "C001",
+        "course_title": "Python for Data Science",
+        "total_attempts": 29,
+        "total_passed": 23,
+        "quiz_pass_rate_pct": 79.31,
+        "avg_score_percentage": 75.23,
+        "avg_time_taken_mins": 27.26
+      },
+      {
+        "course_id": "C003",
+        "course_title": "Machine Learning Fundamentals",
+        "total_attempts": 20,
+        "total_passed": 16,
+        "quiz_pass_rate_pct": 80.0,
+        "avg_score_percentage": 73.09,
+        "avg_time_taken_mins": 29.05
+      }
+    ]
+  }
+}
