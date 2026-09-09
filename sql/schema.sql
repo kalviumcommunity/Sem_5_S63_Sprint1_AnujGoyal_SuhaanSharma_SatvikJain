@@ -88,3 +88,12 @@ CREATE TABLE IF NOT EXISTS behavioural_features (
     FOREIGN KEY (student_id) REFERENCES students(student_id)
 );
 
+-- Analytical Optimization Indexes
+CREATE INDEX IF NOT EXISTS idx_students_target_course ON students(target_course_id);
+CREATE INDEX IF NOT EXISTS idx_students_reg_date ON students(registration_date);
+CREATE INDEX IF NOT EXISTS idx_sessions_student_start ON sessions(student_id, session_start);
+CREATE INDEX IF NOT EXISTS idx_sessions_course ON sessions(course_id);
+CREATE INDEX IF NOT EXISTS idx_quizzes_student_quiz ON quizzes(student_id, quiz_id, attempt_number);
+CREATE INDEX IF NOT EXISTS idx_quizzes_course ON quizzes(course_id);
+CREATE INDEX IF NOT EXISTS idx_behavioural_risk ON behavioural_features(dropout_risk_level);
+CREATE INDEX IF NOT EXISTS idx_behavioural_inactivity ON behavioural_features(days_since_last_activity);

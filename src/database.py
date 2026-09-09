@@ -312,6 +312,91 @@ def execute_window_function_queries(
     return results
 
 
+def create_database_indexes(db_path: Optional[Path] = None) -> list:
+    """
+    Creates performance optimization indexes in SQLite database if they do not already exist.
+
+    Args:
+        db_path: Custom path to SQLite database
+
+    Returns:
+        List of index names created/verified.
+    """
+    index_statements = [
+        "CREATE INDEX IF NOT EXISTS idx_students_target_course ON students(target_course_id);",
+        "CREATE INDEX IF NOT EXISTS idx_students_reg_date ON students(registration_date);",
+        "CREATE INDEX IF NOT EXISTS idx_sessions_student_start ON sessions(student_id, session_start);",
+        "CREATE INDEX IF NOT EXISTS idx_sessions_course ON sessions(course_id);",
+        "CREATE INDEX IF NOT EXISTS idx_quizzes_student_quiz ON quizzes(student_id, quiz_id, attempt_number);",
+        "CREATE INDEX IF NOT EXISTS idx_quizzes_course ON quizzes(course_id);",
+        "CREATE INDEX IF NOT EXISTS idx_behavioural_risk ON behavioural_features(dropout_risk_level);",
+        "CREATE INDEX IF NOT EXISTS idx_behavioural_inactivity ON behavioural_features(days_since_last_activity);"
+    ]
+    conn = get_db_connection(db_path)
+    created_indexes = []
+    try:
+        cursor = conn.cursor()
+        for stmt in index_statements:
+            cursor.execute(stmt)
+            idx_name = stmt.split("IF NOT EXISTS ")[1].split(" ON")[0]
+            created_indexes.append(idx_name)
+        conn.commit()
+        logger.info(f"Created/verified {len(created_indexes)} SQLite performance indexes.")
+    finally:
+        conn.close()
+    return created_indexes
+
+
+def explain_query_plan(query: str, db_path: Optional[Path] = None) -> pd.DataFrame:
+    """
+    Executes EXPLAIN QUERY PLAN for a given SQL query to analyze indexing and execution strategy.
+
+    Args:
+        query: SQL query string to profile
+        db_path: Path to SQLite database
+
+    Returns:
+        DataFrame containing EXPLAIN QUERY PLAN output
+    """
+    explain_sql = f"EXPLAIN QUERY PLAN {query}"
+    return query_to_dataframe(explain_sql, db_path=db_path)
+
+
+def benchmark_query(query: str, db_path: Optional[Path] = None, runs: int = 10) -> dict:
+    """
+    Benchmarks query execution timing over multiple runs.
+
+    Args:
+        query: SQL query string to measure
+        db_path: Path to SQLite database
+        runs: Number of timing repetitions
+
+    Returns:
+        Dictionary containing timing metrics (avg_time_ms, min_time_ms, max_time_ms, runs)
+    """
+    import time
+    conn = get_db_connection(db_path)
+    timings = []
+    try:
+        for _ in range(runs):
+            t0 = time.perf_counter()
+            cursor = conn.cursor()
+            cursor.execute(query)
+            cursor.fetchall()
+            t1 = time.perf_counter()
+            timings.append((t1 - t0) * 1000.0)
+    finally:
+        conn.close()
+
+    avg_ms = sum(timings) / len(timings) if timings else 0.0
+    return {
+        "avg_time_ms": round(avg_ms, 3),
+        "min_time_ms": round(min(timings), 3) if timings else 0.0,
+        "max_time_ms": round(max(timings), 3) if timings else 0.0,
+        "runs": runs
+    }
+
+
 
 
 def validate_join_expansion_integrity(db_path: Optional[Path] = None) -> dict:
