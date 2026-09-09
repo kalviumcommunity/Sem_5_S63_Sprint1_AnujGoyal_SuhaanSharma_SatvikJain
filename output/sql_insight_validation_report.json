@@ -1,0 +1,50 @@
+{
+  "status": "VALID",
+  "tolerance": 0.01,
+  "metrics_compared": 7,
+  "comparison_results": {
+    "total_students": {
+      "sql_value": 50.0,
+      "pandas_value": 50,
+      "absolute_difference": 0.0,
+      "match": true
+    },
+    "completion_rate_pct": {
+      "sql_value": 42.0,
+      "pandas_value": 42.0,
+      "absolute_difference": 0.0,
+      "match": true
+    },
+    "dropout_rate_pct": {
+      "sql_value": 20.0,
+      "pandas_value": 20.0,
+      "absolute_difference": 0.0,
+      "match": true
+    },
+    "active_learner_count": {
+      "sql_value": 45.0,
+      "pandas_value": 45,
+      "absolute_difference": 0.0,
+      "match": true
+    },
+    "avg_quiz_score_pct": {
+      "sql_value": 75.2,
+      "pandas_value": 75.2,
+      "absolute_difference": 0.0,
+      "match": true
+    },
+    "avg_session_duration_minutes": {
+      "sql_value": 69.4,
+      "pandas_value": 69.4,
+      "absolute_difference": 0.0,
+      "match": true
+    },
+    "at_risk_learner_count": {
+      "sql_value": 8.0,
+      "pandas_value": 8,
+      "absolute_difference": 0.0,
+      "match": true
+    }
+  },
+  "discrepancies": []
+}

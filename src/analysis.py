@@ -48,4 +48,14 @@ def run_window_function_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]
     return execute_window_function_queries(db_path=db_path)
 
 
+def run_sql_insight_validation(db_path: Any = None) -> Dict[str, Any]:
+    """
+    Validates key SQL business insights against equivalent Pandas DataFrame calculations.
+    """
+    from src.database import validate_sql_insights_against_pandas
+
+    return validate_sql_insights_against_pandas(db_path=db_path)
+
+
+
 
