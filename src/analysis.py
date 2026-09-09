@@ -29,3 +29,13 @@ def get_business_kpis(db_path: Any = None) -> Dict[str, Any]:
     metrics_result = execute_business_metrics(db_path=db_path)
     return metrics_result.get("kpis", {})
 
+
+def run_multi_table_join_analysis(db_path: Any = None) -> Dict[str, pd.DataFrame]:
+    """
+    Executes multi-table INNER and LEFT JOIN queries combining students, courses, sessions, quizzes, and features.
+    """
+    from src.database import execute_multi_table_joins
+
+    return execute_multi_table_joins(db_path=db_path)
+
+
