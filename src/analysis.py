@@ -77,6 +77,17 @@ def run_data_storytelling_analysis(db_path: Any = None) -> Dict[str, Any]:
     return generate_all_insight_narratives(db_path=db_path)
 
 
+def run_executive_reporting_analysis(db_path: Any = None) -> Dict[str, Any]:
+    """
+    Generates non-technical executive-level report data summarizing overall performance, completion,
+    dropout, learner engagement, major behavioural findings, high-risk segments, course-level findings, and recommended actions.
+    """
+    from src.reporting import generate_executive_report_data
+
+    return generate_executive_report_data(db_path=db_path)
+
+
+
 
 
 
