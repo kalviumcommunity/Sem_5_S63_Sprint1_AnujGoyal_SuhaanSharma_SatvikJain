@@ -19,7 +19,15 @@ from src.visualization import (
     create_distribution_histogram,
     create_cohort_heatmap,
     validate_visualization_config,
+    plot_completion_vs_dropout,
+    plot_session_trends,
+    plot_quiz_performance,
+    plot_engagement,
+    plot_behavioural_segments,
+    plot_course_performance,
+    plot_risk_distribution,
 )
+
 
 
 @pytest.fixture
@@ -212,3 +220,95 @@ def test_empty_dataframe_handling():
 
     for fig in [fig1, fig2, fig3, fig4, fig5]:
         assert isinstance(fig, go.Figure)
+
+
+def test_plot_completion_vs_dropout():
+    """Verify completion vs dropout status bar chart builder."""
+    students_df = pd.DataFrame({
+        "student_id": [f"S00{i}" for i in range(1, 6)],
+        "completion_status": ["Completed", "Completed", "In Progress", "Dropped", "Completed"]
+    })
+    fig = plot_completion_vs_dropout(students_df)
+    assert isinstance(fig, go.Figure)
+    assert "Completion vs Dropout" in fig.layout.title.text
+
+
+def test_plot_session_trends():
+    """Verify session trends line chart builder."""
+    trends_df = pd.DataFrame({
+        "week": ["Week 1", "Week 2", "Week 3"],
+        "duration_minutes": [35.0, 45.0, 50.0]
+    })
+    fig = plot_session_trends(trends_df)
+    assert isinstance(fig, go.Figure)
+    assert "Study Duration" in fig.layout.title.text
+
+
+def test_plot_quiz_performance():
+    """Verify quiz performance distribution chart builder."""
+    quizzes_df = pd.DataFrame({
+        "course_title": ["Python", "Python", "SQL", "SQL"],
+        "score_percentage": [85.0, 90.0, 60.0, 75.0]
+    })
+    fig = plot_quiz_performance(quizzes_df)
+    assert isinstance(fig, go.Figure)
+    assert "Quiz Score Distribution" in fig.layout.title.text
+
+
+def test_plot_engagement():
+    """Verify engagement scatter plot builder."""
+    eng_df = pd.DataFrame({
+        "engagement_score": [85.0, 40.0, 92.0],
+        "course_progress": [90.0, 20.0, 100.0],
+        "dropout_risk_level": ["Low", "High", "Low"]
+    })
+    fig = plot_engagement(eng_df)
+    assert isinstance(fig, go.Figure)
+    assert "Engagement Score" in fig.layout.title.text
+
+
+def test_plot_behavioural_segments():
+    """Verify behavioral segmentation scatter chart builder."""
+    seg_df = pd.DataFrame({
+        "sessions_per_week": [4.0, 1.5, 5.0],
+        "average_session_duration": [45.0, 20.0, 60.0],
+        "dropout_risk_level": ["Low", "Critical", "Low"],
+        "quiz_average": [88.0, 45.0, 95.0]
+    })
+    fig = plot_behavioural_segments(seg_df)
+    assert isinstance(fig, go.Figure)
+    assert "Behavioural Learner Segmentation" in fig.layout.title.text
+
+
+def test_plot_course_performance(sample_course_performance_df):
+    """Verify course performance ranking bar chart builder."""
+    fig = plot_course_performance(sample_course_performance_df)
+    assert isinstance(fig, go.Figure)
+    assert "Course Performance" in fig.layout.title.text
+
+
+def test_plot_risk_distribution():
+    """Verify risk distribution pie/donut chart builder."""
+    risk_df = pd.DataFrame({
+        "dropout_risk_level": ["Low", "Low", "Moderate", "High", "Critical"]
+    })
+    fig = plot_risk_distribution(risk_df)
+    assert isinstance(fig, go.Figure)
+    assert "Dropout Risk Distribution" in fig.layout.title.text
+
+
+def test_domain_plots_empty_df():
+    """Verify all domain interactive chart builders safely handle empty DataFrames."""
+    empty_df = pd.DataFrame()
+    for plot_fn in [
+        plot_completion_vs_dropout,
+        plot_session_trends,
+        plot_quiz_performance,
+        plot_engagement,
+        plot_behavioural_segments,
+        plot_course_performance,
+        plot_risk_distribution
+    ]:
+        fig = plot_fn(empty_df)
+        assert isinstance(fig, go.Figure)
+

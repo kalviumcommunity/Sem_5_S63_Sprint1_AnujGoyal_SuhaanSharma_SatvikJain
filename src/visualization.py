@@ -397,3 +397,347 @@ def validate_visualization_config(config: Dict[str, Any]) -> Dict[str, Any]:
         "violations": violations,
         "config_checked": config
     }
+
+
+# -----------------------------------------------------------------------------
+# Domain-Specific Interactive Analytical Visualization Builders
+# -----------------------------------------------------------------------------
+
+def plot_completion_vs_dropout(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive Plotly bar chart comparing completion vs dropout counts/percentages.
+    """
+    title = "Course Completion vs Dropout Status Breakdown"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Status", y_title="Learner Count", unit="")
+
+    chart_df = df.copy()
+    if "completion_status" in chart_df.columns:
+        status_counts = chart_df["completion_status"].value_counts().reset_index()
+        status_counts.columns = ["completion_status", "count"]
+    elif "status" in chart_df.columns:
+        status_counts = chart_df["status"].value_counts().reset_index()
+        status_counts.columns = ["completion_status", "count"]
+    else:
+        status_counts = pd.DataFrame({
+            "completion_status": ["Completed", "In Progress", "Dropped"],
+            "count": [0, 0, 0]
+        })
+
+    total = status_counts["count"].sum()
+    status_counts["percentage"] = (status_counts["count"] / max(total, 1) * 100).round(1)
+
+    fig = px.bar(
+        status_counts,
+        x="completion_status",
+        y="count",
+        color="completion_status",
+        text=status_counts["percentage"].apply(lambda v: f"{v:.1f}%"),
+        color_discrete_map=RISK_COLOR_MAP,
+        custom_data=["percentage"]
+    )
+
+    fig.update_traces(
+        hovertemplate="<b>Status:</b> %{x}<br>" +
+                      "<b>Learner Count:</b> %{y:,.0f}<br>" +
+                      "<b>Percentage:</b> %{customdata[0]:.1f}%<extra></extra>"
+    )
+    max_val = float(status_counts["count"].max()) if not status_counts["count"].empty else 10.0
+    fig.update_yaxes(range=[0, max(max_val * 1.15, 1.0)])
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title="Completion Status",
+        y_title="Learner Count",
+        unit=""
+    )
+
+
+def plot_session_trends(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive line chart displaying session activity duration and frequency over time.
+    """
+    title = "Weekly Active Study Duration & Session Frequency Trends"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Timeline", y_title="Duration", unit="mins")
+
+    chart_df = df.copy()
+    date_col = next((c for c in ["week", "session_start", "date", "week_start"] if c in chart_df.columns), None)
+    duration_col = next((c for c in ["duration_minutes", "active_minutes", "average_session_duration", "avg_duration_minutes"] if c in chart_df.columns), None)
+
+    if not date_col or not duration_col:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Timeline", y_title="Duration", unit="mins")
+
+    chart_df = chart_df.sort_values(by=date_col)
+
+    fig = px.line(
+        chart_df,
+        x=date_col,
+        y=duration_col,
+        markers=True,
+        color_discrete_sequence=[PRIMARY_BLUE]
+    )
+
+    fig.update_traces(
+        line=dict(width=3),
+        marker=dict(size=8, color=SECONDARY_TEAL),
+        hovertemplate="<b>Period:</b> %{x}<br>" +
+                      f"<b>{duration_col.replace('_', ' ').title()}:</b> %{{y:.1f}} mins<extra></extra>"
+    )
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title=date_col.replace("_", " ").title(),
+        y_title=duration_col.replace("_", " ").title(),
+        unit="mins"
+    )
+
+
+def plot_quiz_performance(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive box/histogram of quiz scores across courses or attempts with pass threshold.
+    """
+    title = "Quiz Score Distribution & Target Mastery Benchmark (70%)"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Quiz / Course", y_title="Score", unit="%")
+
+    chart_df = df.copy()
+    score_col = next((c for c in ["score_percentage", "quiz_average", "score", "avg_quiz_score"] if c in chart_df.columns), None)
+    group_col = next((c for c in ["course_title", "course_id", "quiz_id", "attempt_number", "category"] if c in chart_df.columns), None)
+
+    if not score_col:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Course / Attempt", y_title="Score", unit="%")
+
+    if group_col:
+        fig = px.box(
+            chart_df,
+            x=group_col,
+            y=score_col,
+            color=group_col,
+            points="outliers",
+            color_discrete_sequence=COLOR_PALETTES["categorical"]
+        )
+        fig.update_traces(
+            hovertemplate="<b>Group:</b> %{x}<br>" +
+                          "<b>Score:</b> %{y:.1f}%<extra></extra>"
+        )
+    else:
+        fig = px.histogram(
+            chart_df,
+            x=score_col,
+            nbins=15,
+            color_discrete_sequence=[PRIMARY_BLUE]
+        )
+        fig.update_traces(
+            hovertemplate="<b>Score Range:</b> %{x}%<br>" +
+                          "<b>Count:</b> %{y}<extra></extra>"
+        )
+
+    # Benchmark threshold line
+    fig.add_hline(
+        y=70.0,
+        line_dash="dash",
+        line_color=WARNING_AMBER,
+        annotation_text="Pass Benchmark (70%)",
+        annotation_position="top right"
+    )
+
+    fig.update_yaxes(range=[0, 105])
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title=(group_col or score_col).replace("_", " ").title(),
+        y_title="Score Percentage",
+        unit="%"
+    )
+
+
+def plot_engagement(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive scatter/distribution chart of student engagement scores vs course progress.
+    """
+    title = "Learner Engagement Score vs Course Progress Velocity"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Engagement Score", y_title="Progress", unit="%")
+
+    chart_df = df.copy()
+    eng_col = next((c for c in ["engagement_score", "learning_consistency"] if c in chart_df.columns), None)
+    prog_col = next((c for c in ["course_progress", "completion_rate", "progress_velocity"] if c in chart_df.columns), None)
+    risk_col = next((c for c in ["dropout_risk_level", "risk_level", "completion_status"] if c in chart_df.columns), None)
+
+    if not eng_col or not prog_col:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Engagement Score", y_title="Progress", unit="%")
+
+    fig = px.scatter(
+        chart_df,
+        x=eng_col,
+        y=prog_col,
+        color=risk_col,
+        color_discrete_map=RISK_COLOR_MAP if risk_col in RISK_COLOR_MAP else None,
+        color_discrete_sequence=COLOR_PALETTES["categorical"],
+        hover_data=[c for c in ["student_id", "sessions_per_week", "days_since_last_activity"] if c in chart_df.columns]
+    )
+
+    fig.update_traces(
+        marker=dict(size=10, opacity=0.8, line=dict(width=1, color="white")),
+        hovertemplate="<b>Engagement Score:</b> %{x:.1f}<br>" +
+                      "<b>Progress:</b> %{y:.1f}%<extra></extra>"
+    )
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title=eng_col.replace("_", " ").title(),
+        y_title=prog_col.replace("_", " ").title(),
+        unit="%"
+    )
+
+
+def plot_behavioural_segments(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive scatter/bubble chart analyzing behavioral learner segments.
+    """
+    title = "Behavioural Learner Segmentation Across Study Vectors"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Sessions per Week", y_title="Session Duration", unit="mins")
+
+    chart_df = df.copy()
+    sess_wk_col = next((c for c in ["sessions_per_week", "active_days_per_week"] if c in chart_df.columns), None)
+    dur_col = next((c for c in ["average_session_duration", "duration_minutes", "avg_session_duration"] if c in chart_df.columns), None)
+    risk_col = next((c for c in ["dropout_risk_level", "risk_tier"] if c in chart_df.columns), None)
+    quiz_col = next((c for c in ["quiz_average", "score_percentage"] if c in chart_df.columns), None)
+
+    if not sess_wk_col or not dur_col:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Sessions per Week", y_title="Session Duration", unit="mins")
+
+    fig = px.scatter(
+        chart_df,
+        x=sess_wk_col,
+        y=dur_col,
+        color=risk_col,
+        size=quiz_col if quiz_col else None,
+        color_discrete_map=RISK_COLOR_MAP if risk_col in RISK_COLOR_MAP else None,
+        color_discrete_sequence=COLOR_PALETTES["categorical"]
+    )
+
+    fig.update_traces(
+        marker=dict(opacity=0.85, line=dict(width=1, color="white")),
+        hovertemplate="<b>Sessions / Wk:</b> %{x:.1f}<br>" +
+                      "<b>Avg Duration:</b> %{y:.1f} mins<extra></extra>"
+    )
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title=sess_wk_col.replace("_", " ").title(),
+        y_title=dur_col.replace("_", " ").title(),
+        unit="mins"
+    )
+
+
+def plot_course_performance(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive horizontal bar chart ranking course performance by completion rate.
+    """
+    title = "Course Performance & Completion Rate Rankings (%)"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Completion Rate", y_title="Course Title", unit="%")
+
+    chart_df = df.copy()
+    course_col = next((c for c in ["course_title", "course_id", "category"] if c in chart_df.columns), None)
+    comp_col = next((c for c in ["completion_rate_pct", "completion_rate", "completed_count"] if c in chart_df.columns), None)
+
+    if not course_col or not comp_col:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Completion Rate", y_title="Course Title", unit="%")
+
+    chart_df = chart_df.sort_values(by=comp_col, ascending=True)
+
+    fig = px.bar(
+        chart_df,
+        x=comp_col,
+        y=course_col,
+        orientation="h",
+        color=comp_col,
+        color_continuous_scale="Viridis",
+        text=chart_df[comp_col].apply(lambda v: f"{v:.1f}%" if v <= 100 else f"{v:,.0f}")
+    )
+
+    fig.update_traces(
+        hovertemplate="<b>Course:</b> %{y}<br>" +
+                      f"<b>{comp_col.replace('_', ' ').title()}:</b> %{{x:.1f}}%<extra></extra>"
+    )
+
+    max_val = float(chart_df[comp_col].max()) if not chart_df[comp_col].empty else 100.0
+    fig.update_xaxes(range=[0, max(max_val * 1.15, 100.0)])
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title=comp_col.replace("_", " ").title(),
+        y_title=course_col.replace("_", " ").title(),
+        unit="%"
+    )
+
+
+def plot_risk_distribution(df: pd.DataFrame) -> go.Figure:
+    """
+    Creates an interactive donut/bar chart displaying learner dropout risk distribution.
+    """
+    title = "Learner Dropout Risk Distribution & Retention Priorities"
+    if df.empty:
+        fig = go.Figure()
+        return apply_business_theme(fig, title=title, x_title="Risk Level", y_title="Learner Count", unit="")
+
+    chart_df = df.copy()
+    risk_col = next((c for c in ["dropout_risk_level", "risk_level", "risk_tier"] if c in chart_df.columns), None)
+
+    if risk_col in chart_df.columns:
+        counts = chart_df[risk_col].value_counts().reset_index()
+        counts.columns = ["risk_level", "count"]
+    else:
+        counts = pd.DataFrame({
+            "risk_level": ["Low", "Moderate", "High", "Critical"],
+            "count": [0, 0, 0, 0]
+        })
+
+    total = counts["count"].sum()
+    counts["percentage"] = (counts["count"] / max(total, 1) * 100).round(1)
+
+    fig = px.pie(
+        counts,
+        names="risk_level",
+        values="count",
+        hole=0.45,
+        color="risk_level",
+        color_discrete_map=RISK_COLOR_MAP
+    )
+
+    fig.update_traces(
+        textinfo="label+percent",
+        hovertemplate="<b>Risk Level:</b> %{label}<br>" +
+                      "<b>Learner Count:</b> %{value:,.0f}<br>" +
+                      "<b>Percentage:</b> %{percent}<extra></extra>"
+    )
+
+    return apply_business_theme(
+        fig,
+        title=title,
+        x_title="",
+        y_title="",
+        unit=""
+    )
+
