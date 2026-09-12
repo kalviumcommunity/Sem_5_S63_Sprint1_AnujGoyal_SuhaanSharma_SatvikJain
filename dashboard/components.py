@@ -108,3 +108,75 @@ def render_insight_narrative(narrative: Any) -> None:
         st.markdown(f"**📈 Business Impact:** {data.get('business_impact', '')}")
         st.info(f"**🎯 Suggested Action:** {data.get('suggested_action', '')}")
 
+
+def render_export_download_section(
+    kpi_dict: Optional[Dict[str, Any]] = None,
+    risk_df: Optional[Any] = None,
+    course_df: Optional[Any] = None,
+    behaviour_df: Optional[Any] = None,
+    report_markdown: Optional[str] = None
+) -> None:
+    """
+    Renders reusable Streamlit download buttons for exporting analytical outputs:
+    - KPIs (CSV)
+    - Learner Risk Data (CSV)
+    - Course Metrics (CSV)
+    - Behavioural Segments (CSV)
+    - Executive Summary Report (Markdown)
+    """
+    import pandas as pd
+    from src.export import (
+        get_dataframe_csv_bytes,
+        get_markdown_report_bytes
+    )
+
+    st.subheader("📥 Export Analytical Outputs & Reports")
+    col1, col2, col3, col4, col5 = st.columns(5)
+
+    with col1:
+        if kpi_dict:
+            kpi_df = pd.DataFrame([kpi_dict])
+            st.download_button(
+                label="KPIs (CSV)",
+                data=get_dataframe_csv_bytes(kpi_df),
+                file_name="kpi_summary.csv",
+                mime="text/csv"
+            )
+
+    with col2:
+        if risk_df is not None and not risk_df.empty:
+            st.download_button(
+                label="Risk Data (CSV)",
+                data=get_dataframe_csv_bytes(risk_df),
+                file_name="learner_risk_data.csv",
+                mime="text/csv"
+            )
+
+    with col3:
+        if course_df is not None and not course_df.empty:
+            st.download_button(
+                label="Course Metrics (CSV)",
+                data=get_dataframe_csv_bytes(course_df),
+                file_name="course_metrics.csv",
+                mime="text/csv"
+            )
+
+    with col4:
+        if behaviour_df is not None and not behaviour_df.empty:
+            st.download_button(
+                label="Segments (CSV)",
+                data=get_dataframe_csv_bytes(behaviour_df),
+                file_name="behavioural_segments.csv",
+                mime="text/csv"
+            )
+
+    with col5:
+        if report_markdown:
+            st.download_button(
+                label="Executive Report (MD)",
+                data=get_markdown_report_bytes(report_markdown),
+                file_name="executive_report.md",
+                mime="text/markdown"
+            )
+
+

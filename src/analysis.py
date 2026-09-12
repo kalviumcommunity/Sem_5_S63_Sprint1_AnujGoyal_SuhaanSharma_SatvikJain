@@ -87,6 +87,17 @@ def run_executive_reporting_analysis(db_path: Any = None) -> Dict[str, Any]:
     return generate_executive_report_data(db_path=db_path)
 
 
+def run_insight_export_analysis(db_path: Any = None, export_dir: Any = None) -> Dict[str, Any]:
+    """
+    Exports all core analytical outputs (KPIs, learner risk data, course metrics, behavioural segments, insights, and report)
+    to disk in multi-format packages (CSV, Markdown, JSON, HTML).
+    """
+    from src.export import export_all_analytical_outputs
+
+    return export_all_analytical_outputs(db_path=db_path, export_dir=export_dir)
+
+
+
 
 
 
