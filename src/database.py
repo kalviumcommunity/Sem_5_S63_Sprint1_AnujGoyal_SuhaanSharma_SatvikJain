@@ -248,35 +248,20 @@ def execute_business_metrics(
 
 
 def execute_multi_table_joins(
-
-def execute_aggregation_queries(
-
     db_path: Optional[Path] = None,
     sql_file_path: Optional[Path] = None
 ) -> dict:
     """
-
     Executes multi-table INNER and LEFT JOIN queries from sql/multi_table_joins.sql against SQLite.
 
     Args:
         db_path: Path to SQLite database file
         sql_file_path: Custom path to multi_table_joins.sql
 
-    Executes SQL filtering, grouping, and aggregation queries from sql/aggregation.sql against SQLite.
-
-    Args:
-        db_path: Path to SQLite database file
-        sql_file_path: Custom path to aggregation.sql
-
-
     Returns:
         Dictionary mapping query_name -> pd.DataFrame
     """
-
     target_sql = sql_file_path or (SQL_DIR / "multi_table_joins.sql")
-
-    target_sql = sql_file_path or (SQL_DIR / "aggregation.sql")
-
     queries = load_sql_queries_from_file(target_sql)
     target_db = db_path or DB_PATH
 
@@ -287,15 +272,42 @@ def execute_aggregation_queries(
         try:
             df = query_to_dataframe(query_str, db_path=target_db)
             results[name] = df
-
             logger.info(f"Successfully executed multi-table join query '{name}' ({len(df)} rows returned).")
         except Exception as e:
             logger.error(f"Failed executing multi-table join query '{name}': {e}")
+            results[name] = pd.DataFrame()
 
+    return results
+
+
+def execute_aggregation_queries(
+    db_path: Optional[Path] = None,
+    sql_file_path: Optional[Path] = None
+) -> dict:
+    """
+    Executes SQL filtering, grouping, and aggregation queries from sql/aggregation.sql against SQLite.
+
+    Args:
+        db_path: Path to SQLite database file
+        sql_file_path: Custom path to aggregation.sql
+
+    Returns:
+        Dictionary mapping query_name -> pd.DataFrame
+    """
+    target_sql = sql_file_path or (SQL_DIR / "aggregation.sql")
+    queries = load_sql_queries_from_file(target_sql)
+    target_db = db_path or DB_PATH
+
+    results = {}
+    for name, query_str in queries.items():
+        if not query_str.endswith(";"):
+            query_str += ";"
+        try:
+            df = query_to_dataframe(query_str, db_path=target_db)
+            results[name] = df
             logger.info(f"Successfully executed aggregation query '{name}' ({len(df)} rows returned).")
         except Exception as e:
             logger.error(f"Failed executing aggregation query '{name}': {e}")
-
             results[name] = pd.DataFrame()
 
     return results

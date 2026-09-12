@@ -15,3 +15,9 @@ def render_header(title: str, subtitle: str) -> None:
 def render_kpi_card(title: str, value: str, delta: str = None) -> None:
     """Renders a standard KPI metric card."""
     st.metric(label=title, value=value, delta=delta)
+
+
+def render_chart(fig, use_container_width: bool = True) -> None:
+    """Renders a standardized Plotly chart object in Streamlit dashboard."""
+    st.plotly_chart(fig, use_container_width=use_container_width)
+
