@@ -1,11 +1,19 @@
 """
 Main Streamlit Application
-Learning Behaviour & Course Completion Intelligence Dashboard
+Learning Behaviour & Course Completion Intelligence Data Product
 """
 
 import streamlit as st
-from dashboard.components import render_header, render_kpi_summary_grid
-from src.analysis import get_business_kpis
+from dashboard.components import render_header
+from dashboard.views import (
+    view_overview,
+    view_student_behaviour,
+    view_course_analytics,
+    view_dropout_risk,
+    view_behaviour_trends,
+    view_sql_insights,
+    view_reports
+)
 
 
 def main() -> None:
@@ -24,20 +32,32 @@ def main() -> None:
     st.sidebar.title("Navigation")
     page = st.sidebar.radio(
         "Select View",
-        ["Overview", "Engagement & Behaviour", "Risk & Drop-off Detection", "SQL Analytics"]
+        [
+            "Overview",
+            "Student Behaviour",
+            "Course Analytics",
+            "Dropout Risk",
+            "Behaviour Trends",
+            "SQL Insights",
+            "Reports"
+        ]
     )
 
-    # Fetch live business KPIs from SQL analytics layer or fallback defaults
-    try:
-        kpi_data = get_business_kpis()
-    except Exception:
-        kpi_data = {}
-
-    # Render 6 core summary KPI cards
-    render_kpi_summary_grid(kpi_data, columns=6)
-
-    st.divider()
-    st.info(f"Currently viewing: **{page}**. Project analytics pipeline initialized successfully.")
+    # Route to view handler
+    if page == "Overview":
+        view_overview()
+    elif page == "Student Behaviour":
+        view_student_behaviour()
+    elif page == "Course Analytics":
+        view_course_analytics()
+    elif page == "Dropout Risk":
+        view_dropout_risk()
+    elif page == "Behaviour Trends":
+        view_behaviour_trends()
+    elif page == "SQL Insights":
+        view_sql_insights()
+    elif page == "Reports":
+        view_reports()
 
 
 if __name__ == "__main__":
