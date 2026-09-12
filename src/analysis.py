@@ -67,6 +67,17 @@ def run_sql_insight_validation(db_path: Any = None) -> Dict[str, Any]:
     return validate_sql_insights_against_pandas(db_path=db_path)
 
 
+def run_data_storytelling_analysis(db_path: Any = None) -> Dict[str, Any]:
+    """
+    Generates 4-stage analytical insight narratives (Observation -> Interpretation -> Business Impact -> Suggested Action)
+    across engagement, completion, dropout, risk, and course performance domains.
+    """
+    from src.storytelling import generate_all_insight_narratives
+
+    return generate_all_insight_narratives(db_path=db_path)
+
+
+
 
 
 

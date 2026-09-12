@@ -84,3 +84,27 @@ def render_kpi_summary_grid(
 def render_chart(fig, use_container_width: bool = True) -> None:
     """Renders a standardized Plotly chart object in Streamlit dashboard."""
     st.plotly_chart(fig, use_container_width=use_container_width)
+
+
+def render_insight_narrative(narrative: Any) -> None:
+    """
+    Renders a structured 4-stage analytical insight narrative card in Streamlit:
+    Observation -> Interpretation -> Business Impact -> Suggested Action
+    """
+    if hasattr(narrative, "to_dict"):
+        data = narrative.to_dict()
+    elif isinstance(narrative, dict):
+        data = narrative
+    else:
+        st.warning("Invalid narrative format.")
+        return
+
+    title = data.get("title", "Analytical Insight Narrative")
+    domain = data.get("domain", "").upper()
+
+    with st.expander(f"💡 [{domain}] {title}", expanded=True):
+        st.markdown(f"**🔍 Observation:** {data.get('observation', '')}")
+        st.markdown(f"**🧠 Interpretation:** {data.get('interpretation', '')}")
+        st.markdown(f"**📈 Business Impact:** {data.get('business_impact', '')}")
+        st.info(f"**🎯 Suggested Action:** {data.get('suggested_action', '')}")
+
