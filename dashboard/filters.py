@@ -201,8 +201,8 @@ def filter_dashboard_views(views: Dict[str, pd.DataFrame], filters: DashboardFil
     return filtered_views
 
 
-def calculate_filtered_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
-    """Calculate KPI cards from the same filtered learner view as the charts."""
+def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
+    """Calculate all dashboard KPIs from the currently filtered analytical view."""
     dataframe = views.get("student_engagement_view", pd.DataFrame())
     if dataframe.empty:
         return {
@@ -213,6 +213,12 @@ def calculate_filtered_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
             "avg_quiz_score_pct": 0.0,
             "avg_session_duration_minutes": 0.0,
             "at_risk_learner_count": 0,
+            "completion_rate_delta": None,
+            "dropout_rate_delta": None,
+            "active_learners_delta": None,
+            "at_risk_learners_delta": None,
+            "avg_quiz_score_delta": None,
+            "avg_session_duration_delta": None,
         }
 
     total = len(dataframe)
@@ -228,4 +234,13 @@ def calculate_filtered_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
         "avg_quiz_score_pct": round(quiz_scores.mean(), 2),
         "avg_session_duration_minutes": round(session_duration.mean(), 2),
         "at_risk_learner_count": int(risk.isin(["high", "critical"]).sum()),
+        "completion_rate_delta": None,
+        "dropout_rate_delta": None,
+        "active_learners_delta": None,
+        "at_risk_learners_delta": None,
+        "avg_quiz_score_delta": None,
+        "avg_session_duration_delta": None,
     }
+
+
+calculate_filtered_kpis = calculate_realtime_kpis
