@@ -1442,6 +1442,13 @@ GitHub Actions will automatically:
 * Check code quality
 * Verify SQL queries
 
+The workflow is implemented at
+[`.github/workflows/data_pipeline.yml`](.github/workflows/data_pipeline.yml).
+It runs on pushes and pull requests, tests Python 3.10 through 3.12, compiles
+the project, runs the full test suite, validates ingestion and pipeline tests,
+executes a SQLite schema/view smoke check, and fails the job when any command
+returns a non-zero status. It does not contain credentials or API keys.
+
 Example workflow:
 
 ```text
