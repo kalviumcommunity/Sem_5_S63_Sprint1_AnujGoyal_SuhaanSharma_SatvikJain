@@ -71,6 +71,131 @@ The project follows the required Sprint 1 technology stack.
 
 ---
 
+## Final Delivery Guide
+
+### Objective and Problem
+
+This product analyzes learning behaviour that may predict long-term course
+completion or silent learner drop-off. It turns learner, course, session, and
+quiz records into validated behavioural features, SQL analytics, risk signals,
+interactive visualizations, and a Streamlit dashboard for academic and business
+teams.
+
+### Data Sources and Dictionary
+
+The ingestion contract expects these entity files in `data/raw/`:
+
+| Entity | Key data |
+|---|---|
+| `students.csv` or `students.json` | learner identity, registration, course, completion status |
+| `courses.csv` or `courses.json` | course title, category, modules, quizzes, duration |
+| `sessions.csv` or `sessions.json` | learner activity timestamps, duration, active/idle minutes |
+| `quizzes.csv` or `quizzes.json` | attempts, scores, pass flags, dates |
+
+The repository currently contains sample/raw-workflow fixtures rather than all
+four named entity files, so the default pipeline reports a successful logged
+no-op until those sources are supplied. Uploads support CSV and JSON through the
+dashboard. Definitions, required fields, valid domains, and analytical use are
+documented in [docs/data_dictionary.md](docs/data_dictionary.md) and encoded in
+[src/data_dictionary.py](src/data_dictionary.py).
+
+### Architecture and Pipeline
+
+```text
+CSV/JSON sources
+   -> ingestion and schema validation
+   -> cleaning, standardisation, imputation, deduplication
+   -> Student 360 joins and behavioural feature engineering
+   -> SQLite tables, views, business metrics, and analysis
+   -> Plotly charts, Streamlit dashboard, reports, alerts, and sharing
+```
+
+The repeat-safe entry point is `src.pipeline.run_pipeline()`. It runs ingestion,
+validation, cleaning, feature engineering, analysis, SQLite replacement writes,
+and output generation. It logs each stage and returns structured success or
+failure details. See [src/pipeline.py](src/pipeline.py) and
+[docs/concept_mapping.md](docs/concept_mapping.md) for the complete evidence map.
+
+### Behavioural Features and KPIs
+
+The feature layer calculates tenure, average session duration, sessions per
+week, quiz average, quiz attempts, course progress, progress velocity, days since
+last activity, completion indicator, learning consistency, engagement score,
+dropout risk score, and risk level. The dashboard monitors completion rate,
+dropout rate, active learners, at-risk learners, average quiz score, and average
+session duration from the selected cohort.
+
+### SQL Analytics and Visualizations
+
+SQLite stores `students`, `courses`, `sessions`, `quizzes`, and
+`behavioural_features`. SQL scripts provide business metrics, aggregations,
+joins, window functions, query-plan analysis, insight validation, and reusable
+views. Plotly builders provide completion/dropout, weekly activity, quiz,
+engagement, behavioural segment, course performance, risk, distribution,
+correlation, and cohort visualizations. Visualization rules are documented in
+[docs/visualization_principles.md](docs/visualization_principles.md).
+
+### Streamlit Dashboard and Delivery Features
+
+Start at [dashboard/app.py](dashboard/app.py). The dashboard provides overview,
+learner behaviour, course analytics, dropout risk, behaviour trends, SQL
+insights, reports, and dataset upload views. Shared filters cover course, date,
+completion status, risk, learner segment, and quiz performance. Session state
+preserves selections and uploads across reruns. Filtered KPIs and charts update
+from one analytical view bundle. Configurable alert thresholds report
+`NORMAL`, `WARNING`, and `CRITICAL` with business explanations. Reports can be
+previewed and optionally emailed through environment-backed SMTP; no credentials
+are stored in the repository.
+
+### Automation
+
+The GitHub Actions workflow at
+[.github/workflows/data_pipeline.yml](.github/workflows/data_pipeline.yml)
+installs Python 3.10-3.12 dependencies, compiles code, runs all tests, checks
+validation and pipeline tests, smoke-validates SQL schema/views, and asserts the
+pipeline status. It uses no secrets directly in the workflow.
+
+### Installation and Execution
+
+```bash
+git clone <repository-url>
+cd <repository-directory>
+python -m venv .venv
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m pytest
+python -m src.pipeline
+streamlit run dashboard/app.py
+```
+
+For a populated source directory or isolated run, call `run_pipeline` with
+`source_dir`, `db_path`, and `output_dir`. Optional email delivery requires the
+`LEARNING_ANALYTICS_SMTP_*` and `LEARNING_ANALYTICS_REPORT_FROM` environment
+variables described in the Concept 47 section below.
+
+### Testing
+
+The test suite covers ingestion, validation, cleaning, features, risk scoring,
+SQL, exports, dashboard state, uploads, filters, alerts, sharing, and pipeline
+repeatability. Run the complete suite with `python -m pytest`; CI runs the same
+suite and additional compile/SQL/pipeline checks.
+
+### Limitations and Future Scope
+
+Behavioural relationships are associations, not causal proof. Results depend on
+data completeness, source schema quality, feature definitions, and calibrated
+thresholds. The default repository data does not include all four production
+entity files. Email delivery requires an external SMTP provider, and Concept 23
+currently remains a documented funnel-analysis gap.
+
+Future work includes a dedicated learning funnel, calibrated or ML-based
+dropout prediction, SHAP explanations, intervention experiments, LMS
+integration, real-time event ingestion, personalized recommendations, and
+managed notification providers.
+
+---
+
 # 🏗️ End-to-End Architecture
 
 ```text
@@ -1950,24 +2075,14 @@ Tests should cover:
 
 The project will be considered successful when:
 
-* [x] All 50 Sprint concepts are implemented.
-* [ ] Raw datasets can be ingested.
-* [ ] Data quality checks are performed.
-* [ ] Data cleaning pipeline is implemented.
-* [ ] Behavioural features are generated.
-* [ ] EDA identifies meaningful patterns.
-* [ ] SQL analytics layer is implemented.
-* [ ] KPIs are defined.
-* [ ] Dropout risk is identified.
-* [ ] Plotly visualizations are implemented.
-* [ ] Streamlit dashboard is functional.
-* [ ] Dataset upload works.
-* [ ] Dashboard filters work.
-* [ ] Session state is implemented.
-* [ ] Alerts and thresholds are implemented.
-* [ ] Reports can be generated.
-* [ ] GitHub Actions automates validation.
-* [ ] Complete documentation is provided.
+* [x] Ingestion and source validation are implemented.
+* [x] Data quality, cleaning, and standardisation are implemented.
+* [x] Behavioural features, KPIs, SQL analytics, and risk scoring are implemented.
+* [x] Plotly visualizations and the Streamlit dashboard are implemented.
+* [x] Uploads, filters, session state, alerts, reports, and email abstraction are implemented.
+* [x] The repeat-safe pipeline and GitHub Actions validation are implemented.
+* [x] Final documentation and the concept evidence map are provided.
+* [ ] Dedicated multi-stage funnel analysis remains outstanding; see [docs/concept_mapping.md](docs/concept_mapping.md).
 
 ---
 
