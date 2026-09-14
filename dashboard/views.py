@@ -18,6 +18,7 @@ from dashboard.components import (
     render_kpi_summary_grid,
     render_chart,
     render_alert_panel,
+    render_report_sharing,
     render_insight_narrative,
     render_export_download_section
 )
@@ -38,6 +39,7 @@ from src.visualization import (
 from src.database import execute_analytical_views
 from dashboard.filters import DashboardFilters, calculate_realtime_kpis
 from dashboard.alerts import AlertThresholds, evaluate_metric_alerts
+from dashboard.sharing import build_periodic_summary, get_email_sender
 from dashboard.state import (
     UPLOAD_WIDGET_KEY,
     get_uploaded_dataset,
@@ -260,6 +262,16 @@ def view_reports(
         course_df=views.get("course_performance_view"),
         behaviour_df=views.get("student_engagement_view"),
         report_markdown=report_md
+    )
+    current_kpis = calculate_realtime_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
+    current_alerts = evaluate_metric_alerts(
+        current_kpis,
+        thresholds=AlertThresholds(),
+        weekly_activity=views.get("weekly_activity_view"),
+    )
+    render_report_sharing(
+        build_periodic_summary(current_kpis, views, current_alerts),
+        get_email_sender(),
     )
 
 

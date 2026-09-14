@@ -9,6 +9,7 @@ from typing import Dict, Any, Optional
 import streamlit as st
 from dashboard.utils import format_kpi_summary
 from dashboard.alerts import CRITICAL, NORMAL, WARNING, MetricAlert, overall_alert_status
+from dashboard.sharing import DeliveryResult, PeriodicSummary
 
 
 def render_header(title: str, subtitle: str) -> None:
@@ -99,6 +100,21 @@ def render_alert_panel(alerts: list[MetricAlert]) -> None:
             st.warning(f"{alert.status} | {message}")
         else:
             st.success(f"{alert.status} | {message}")
+
+
+def render_report_sharing(summary: PeriodicSummary, sender: Any) -> None:
+    """Render optional report preview and email delivery controls."""
+    st.subheader("Share Periodic Analytics Summary")
+    st.markdown(summary.markdown)
+    recipient = st.text_input("Recipient email", key="report_recipient_email")
+    if st.button("Send summary email", key="send_summary_email"):
+        result: DeliveryResult = sender.send(recipient, summary)
+        if result.status == "SENT":
+            st.success(result.message)
+        elif result.status == "NOT_CONFIGURED":
+            st.info(result.message)
+        else:
+            st.error(result.message)
 
 
 def render_insight_narrative(narrative: Any) -> None:

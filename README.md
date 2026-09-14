@@ -1376,6 +1376,27 @@ Optional email integration can send:
 Weekly Learning Behaviour Report
 ```
 
+The Reports view includes an optional periodic summary containing live filtered
+KPIs, major course trends, active risk alerts, and important insights. Email
+delivery is provided through the mockable `EmailSender` contract and the
+environment-backed `SmtpEmailSender` implementation in
+`dashboard/sharing.py`.
+
+Configure delivery only through deployment secrets or environment variables:
+
+```text
+LEARNING_ANALYTICS_SMTP_HOST
+LEARNING_ANALYTICS_SMTP_PORT       # optional, defaults to 587
+LEARNING_ANALYTICS_SMTP_USERNAME
+LEARNING_ANALYTICS_SMTP_PASSWORD
+LEARNING_ANALYTICS_REPORT_FROM
+LEARNING_ANALYTICS_SMTP_USE_TLS    # optional, defaults to true
+```
+
+When these values are absent, the workflow returns `NOT_CONFIGURED` and does
+not attempt or simulate delivery. Credentials and API keys must never be
+committed to the repository.
+
 ---
 
 ### 48. Automated Data Pipeline Execution
