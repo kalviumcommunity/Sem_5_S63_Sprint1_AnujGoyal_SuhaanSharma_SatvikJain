@@ -1,5 +1,5 @@
 """
-Dashboard Utility Helpers & KPI Metric Formatting.
+Dashboard Utility Helpers, KPI Metric Formatting, and Dataset Uploads.
 
 Provides formatting and extraction functions for the 6 core executive KPI metrics:
 - Completion Rate
@@ -10,8 +10,58 @@ Provides formatting and extraction functions for the 6 core executive KPI metric
 - Average Session Duration
 """
 
-from typing import Dict, Any, Optional
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import Any, Dict, Optional, Tuple
 import pandas as pd
+
+from src.ingestion import load_dataset
+from src.validation import ValidationResult, validate_dataset_schema, validate_file_source
+from src.utils import DataLoadError
+
+
+SUPPORTED_UPLOAD_TYPES = ["csv", "json"]
+
+
+def load_uploaded_dataset(uploaded_file: Any) -> Tuple[pd.DataFrame, ValidationResult]:
+    """Load and validate a Streamlit-uploaded CSV or JSON dataset."""
+    filename = Path(getattr(uploaded_file, "name", "uploaded_dataset")).name
+    suffix = Path(filename).suffix.lower()
+
+    with NamedTemporaryFile(suffix=suffix, delete=False) as temporary_file:
+        temporary_path = Path(temporary_file.name)
+        temporary_file.write(uploaded_file.getvalue())
+
+    try:
+        source_result = validate_file_source(
+            temporary_path,
+            supported_formats=[f".{file_type}" for file_type in SUPPORTED_UPLOAD_TYPES],
+        )
+        if not source_result.is_valid:
+            return pd.DataFrame(), ValidationResult(
+                is_valid=False,
+                dataset_name=filename,
+                errors=source_result.errors,
+            )
+
+        try:
+            dataframe = load_dataset(temporary_path, validate_source=True)
+        except DataLoadError as error:
+            return pd.DataFrame(), ValidationResult(
+                is_valid=False,
+                dataset_name=filename,
+                errors=[str(error)],
+            )
+
+        validation_result = validate_dataset_schema(
+            dataframe,
+            required_columns=[],
+            dataset_name=filename,
+            min_rows=1,
+        )
+        return dataframe, validation_result
+    finally:
+        temporary_path.unlink(missing_ok=True)
 
 
 def format_metric(value: float, prefix: str = "", suffix: str = "", decimals: int = 1) -> str:

@@ -1234,7 +1234,8 @@ Dashboard
 ├── Dropout Risk
 ├── Behaviour Trends
 ├── SQL Insights
-└── Reports
+├── Reports
+└── Dataset Upload
 ```
 
 ---
@@ -1251,6 +1252,12 @@ The interface should show:
 * Preview
 * Data types
 * Missing values
+
+The **Dataset Upload** dashboard view accepts one CSV or JSON file at a time. It
+runs the upload through the existing source and dataset validation layer before
+showing the preview, row/column counts, data types, and per-column missing-value
+counts. Invalid or empty uploads are reported without entering the analytics
+workflow.
 
 ---
 
