@@ -1265,6 +1265,12 @@ workflow.
 
 Provide filters such as:
 
+The dashboard sidebar now applies shared Course, registration date range,
+completion status, risk level, learner segment, and minimum quiz performance
+filters. All dashboard pages receive one filtered analytical view bundle, so
+KPI cards, learner charts, course summaries, and risk tables stay synchronized
+without duplicating filtering logic in individual views.
+
 ```text
 Course
 Student Segment
