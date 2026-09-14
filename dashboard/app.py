@@ -5,6 +5,8 @@ Learning Behaviour & Course Completion Intelligence Data Product
 
 import streamlit as st
 from dashboard.components import render_header
+from dashboard.filters import filter_dashboard_views, render_filter_sidebar
+from src.database import execute_analytical_views
 from dashboard.views import (
     view_overview,
     view_student_behaviour,
@@ -45,23 +47,30 @@ def main() -> None:
         ]
     )
 
-    # Route to view handler
-    if page == "Overview":
-        view_overview()
-    elif page == "Student Behaviour":
-        view_student_behaviour()
-    elif page == "Course Analytics":
-        view_course_analytics()
-    elif page == "Dropout Risk":
-        view_dropout_risk()
-    elif page == "Behaviour Trends":
-        view_behaviour_trends()
-    elif page == "SQL Insights":
-        view_sql_insights()
-    elif page == "Reports":
-        view_reports()
-    elif page == "Dataset Upload":
+    if page == "Dataset Upload":
         view_dataset_upload()
+    else:
+        try:
+            raw_views = execute_analytical_views()
+        except Exception:
+            raw_views = {}
+        filters = render_filter_sidebar(raw_views)
+        filtered_views = filter_dashboard_views(raw_views, filters)
+
+        if page == "Overview":
+            view_overview(views=filtered_views, filters=filters)
+        elif page == "Student Behaviour":
+            view_student_behaviour(views=filtered_views, filters=filters)
+        elif page == "Course Analytics":
+            view_course_analytics(views=filtered_views, filters=filters)
+        elif page == "Dropout Risk":
+            view_dropout_risk(views=filtered_views, filters=filters)
+        elif page == "Behaviour Trends":
+            view_behaviour_trends(views=filtered_views, filters=filters)
+        elif page == "SQL Insights":
+            view_sql_insights(views=filtered_views, filters=filters)
+        elif page == "Reports":
+            view_reports(views=filtered_views, filters=filters)
 
 
 if __name__ == "__main__":
