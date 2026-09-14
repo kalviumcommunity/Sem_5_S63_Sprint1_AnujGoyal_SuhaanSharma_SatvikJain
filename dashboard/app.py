@@ -6,6 +6,7 @@ Learning Behaviour & Course Completion Intelligence Data Product
 import streamlit as st
 from dashboard.components import render_header
 from dashboard.filters import filter_dashboard_views, render_filter_sidebar
+from dashboard.state import PAGE_KEY, initialize_session_state
 from src.database import execute_analytical_views
 from dashboard.views import (
     view_overview,
@@ -26,6 +27,7 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded"
     )
+    initialize_session_state()
 
     render_header(
         title="🎓 Learning Behaviour & Course Completion Intelligence",
@@ -44,7 +46,8 @@ def main() -> None:
             "SQL Insights",
             "Reports",
             "Dataset Upload"
-        ]
+        ],
+        key=PAGE_KEY,
     )
 
     if page == "Dataset Upload":

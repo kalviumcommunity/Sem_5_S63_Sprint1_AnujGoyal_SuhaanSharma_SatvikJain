@@ -7,6 +7,13 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 import streamlit as st
 
+from dashboard.state import (
+    FILTER_KEYS,
+    initialize_session_state,
+    save_filter_snapshot,
+    sync_filter_options,
+)
+
 
 @dataclass
 class DashboardFilters:
@@ -52,44 +59,57 @@ def _learner_dataframe(views: Dict[str, pd.DataFrame]) -> pd.DataFrame:
 
 def render_filter_sidebar(views: Dict[str, pd.DataFrame]) -> DashboardFilters:
     """Render shared sidebar widgets and return their current selections."""
+    initialize_session_state()
     dataframe = _learner_dataframe(views)
     st.sidebar.subheader("Dashboard Filters")
 
     courses = _option_values(dataframe, ["course_title", "target_course_id", "course_id"])
-    selected_courses = st.sidebar.multiselect("Course", courses, default=courses)
+    statuses = _option_values(dataframe, ["completion_status"])
+    risks = _option_values(dataframe, ["dropout_risk_level", "risk_level", "risk_tier"])
+    segments = ["Low Engagement", "Moderate Engagement", "High Engagement"]
+    sync_filter_options(
+        options={
+            "courses": courses,
+            "completion_statuses": statuses,
+            "risk_levels": risks,
+            "learner_segments": segments,
+        },
+        date_bounds=_date_bounds(dataframe),
+    )
+
+    selected_courses = st.sidebar.multiselect("Course", courses, key=FILTER_KEYS["courses"])
 
     bounds = _date_bounds(dataframe)
     selected_dates = None
     if bounds:
         selected_dates = st.sidebar.date_input(
             "Registration date range",
-            value=bounds,
             min_value=bounds[0],
             max_value=bounds[1],
+            key=FILTER_KEYS["date_range"],
         )
         if isinstance(selected_dates, (tuple, list)) and len(selected_dates) == 2:
             selected_dates = (selected_dates[0], selected_dates[1])
         else:
             selected_dates = None
 
-    statuses = _option_values(dataframe, ["completion_status"])
-    selected_statuses = st.sidebar.multiselect("Completion status", statuses, default=statuses)
-
-    risks = _option_values(dataframe, ["dropout_risk_level", "risk_level", "risk_tier"])
-    selected_risks = st.sidebar.multiselect("Risk level", risks, default=risks)
-
-    segments = ["Low Engagement", "Moderate Engagement", "High Engagement"]
-    selected_segments = st.sidebar.multiselect("Learner segment", segments, default=segments)
+    selected_statuses = st.sidebar.multiselect(
+        "Completion status", statuses, key=FILTER_KEYS["completion_statuses"]
+    )
+    selected_risks = st.sidebar.multiselect("Risk level", risks, key=FILTER_KEYS["risk_levels"])
+    selected_segments = st.sidebar.multiselect(
+        "Learner segment", segments, key=FILTER_KEYS["learner_segments"]
+    )
 
     selected_quiz_score = st.sidebar.slider(
         "Minimum quiz performance (%)",
         min_value=0.0,
         max_value=100.0,
-        value=0.0,
         step=1.0,
+        key=FILTER_KEYS["minimum_quiz_score"],
     )
 
-    return DashboardFilters(
+    filters = DashboardFilters(
         courses=selected_courses,
         date_range=selected_dates,
         completion_statuses=selected_statuses,
@@ -97,6 +117,8 @@ def render_filter_sidebar(views: Dict[str, pd.DataFrame]) -> DashboardFilters:
         learner_segments=selected_segments,
         minimum_quiz_score=selected_quiz_score,
     )
+    save_filter_snapshot(filters)
+    return filters
 
 
 def _filter_by_values(dataframe: pd.DataFrame, columns: List[str], values: List[str]) -> pd.DataFrame:
