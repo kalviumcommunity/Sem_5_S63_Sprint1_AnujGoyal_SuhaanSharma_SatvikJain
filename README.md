@@ -1283,6 +1283,11 @@ Engagement Level
 
 All charts should update according to the selected filters.
 
+The Overview cards and Plotly charts consume the same filtered analytical view
+bundle on every Streamlit rerun. KPI values are calculated from the selected
+learner cohort, including zero-result selections, rather than using dashboard
+demo values.
+
 ---
 
 ### 44. Streamlit Session State & Workflow Persistence

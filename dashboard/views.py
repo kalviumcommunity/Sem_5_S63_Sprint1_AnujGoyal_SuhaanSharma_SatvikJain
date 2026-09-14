@@ -35,7 +35,7 @@ from src.visualization import (
     plot_risk_distribution
 )
 from src.database import execute_analytical_views
-from dashboard.filters import DashboardFilters, calculate_filtered_kpis
+from dashboard.filters import DashboardFilters, calculate_realtime_kpis
 from dashboard.state import (
     UPLOAD_WIDGET_KEY,
     get_uploaded_dataset,
@@ -66,7 +66,7 @@ def view_overview(
     st.caption("High-level KPI scorecard and macro cohort analysis.")
 
     views = _resolve_views(db_path, views)
-    kpi_data = calculate_filtered_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
+    kpi_data = calculate_realtime_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
 
     render_kpi_summary_grid(kpi_data, columns=6)
     st.divider()
@@ -243,7 +243,7 @@ def view_reports(
     st.divider()
 
     views = _resolve_views(db_path, views)
-    kpis = calculate_filtered_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
+    kpis = calculate_realtime_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
 
     render_export_download_section(
         kpi_dict=kpis,
