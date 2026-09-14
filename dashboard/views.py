@@ -17,6 +17,7 @@ import pandas as pd
 from dashboard.components import (
     render_kpi_summary_grid,
     render_chart,
+    render_alert_panel,
     render_insight_narrative,
     render_export_download_section
 )
@@ -36,6 +37,7 @@ from src.visualization import (
 )
 from src.database import execute_analytical_views
 from dashboard.filters import DashboardFilters, calculate_realtime_kpis
+from dashboard.alerts import AlertThresholds, evaluate_metric_alerts
 from dashboard.state import (
     UPLOAD_WIDGET_KEY,
     get_uploaded_dataset,
@@ -69,6 +71,13 @@ def view_overview(
     kpi_data = calculate_realtime_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
 
     render_kpi_summary_grid(kpi_data, columns=6)
+    render_alert_panel(
+        evaluate_metric_alerts(
+            kpi_data,
+            thresholds=AlertThresholds(),
+            weekly_activity=views.get("weekly_activity_view"),
+        )
+    )
     st.divider()
 
     col1, col2 = st.columns(2)

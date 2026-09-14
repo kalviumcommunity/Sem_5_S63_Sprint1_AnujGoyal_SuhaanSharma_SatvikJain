@@ -8,6 +8,7 @@ executive KPI summary grids, and Plotly chart rendering.
 from typing import Dict, Any, Optional
 import streamlit as st
 from dashboard.utils import format_kpi_summary
+from dashboard.alerts import CRITICAL, NORMAL, WARNING, MetricAlert, overall_alert_status
 
 
 def render_header(title: str, subtitle: str) -> None:
@@ -84,6 +85,20 @@ def render_kpi_summary_grid(
 def render_chart(fig, use_container_width: bool = True) -> None:
     """Renders a standardized Plotly chart object in Streamlit dashboard."""
     st.plotly_chart(fig, use_container_width=use_container_width)
+
+
+def render_alert_panel(alerts: list[MetricAlert]) -> None:
+    """Render threshold results with clear severity and business explanations."""
+    status = overall_alert_status(alerts)
+    st.subheader(f"Metric Monitoring: {status}")
+    for alert in alerts:
+        message = f"{alert.metric}: {alert.explanation}"
+        if alert.status == CRITICAL:
+            st.error(f"{alert.status} | {message}")
+        elif alert.status == WARNING:
+            st.warning(f"{alert.status} | {message}")
+        else:
+            st.success(f"{alert.status} | {message}")
 
 
 def render_insight_narrative(narrative: Any) -> None:

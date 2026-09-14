@@ -1352,6 +1352,13 @@ CRITICAL
 
 This allows the platform to identify unusual changes automatically.
 
+The Overview dashboard evaluates completion rate, dropout rate, at-risk learner
+population, and week-over-week engagement decline against the configurable
+`AlertThresholds` policy in `dashboard/alerts.py`. Each metric is reported as
+`NORMAL`, `WARNING`, or `CRITICAL` with a business explanation, and the overall
+panel uses the highest triggered severity. Threshold policy values are passed
+into the evaluator rather than embedded in page or business logic.
+
 ---
 
 ### 47. Insight Sharing & Email Report Integration
