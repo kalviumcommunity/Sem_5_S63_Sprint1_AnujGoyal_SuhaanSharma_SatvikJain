@@ -35,6 +35,7 @@ from src.visualization import (
     plot_risk_distribution
 )
 from src.database import execute_analytical_views
+from dashboard.utils import load_uploaded_dataset
 
 
 def view_overview(db_path: Any = None) -> None:
@@ -230,3 +231,49 @@ def view_reports(db_path: Any = None) -> None:
         behaviour_df=views.get("student_engagement_view"),
         report_markdown=report_md
     )
+
+
+def view_dataset_upload() -> None:
+    """Renders the CSV/JSON upload and dataset preview page."""
+    st.header("Dataset Upload & Preview")
+    st.caption("Inspect a dataset before using it in the learning analytics workflow.")
+
+    uploaded_file = st.file_uploader(
+        "Upload a CSV or JSON dataset",
+        type=["csv", "json"],
+        accept_multiple_files=False,
+    )
+    if uploaded_file is None:
+        st.info("Upload a CSV or JSON file to preview its structure.")
+        return
+
+    dataframe, validation_result = load_uploaded_dataset(uploaded_file)
+    if not validation_result.is_valid:
+        st.error(f"Upload validation failed for '{uploaded_file.name}'.")
+        for error in validation_result.errors:
+            st.write(f"- {error}")
+        return
+
+    st.success(f"'{uploaded_file.name}' passed validation.")
+    metric_columns = st.columns(2)
+    metric_columns[0].metric("Rows", f"{validation_result.row_count:,}")
+    metric_columns[1].metric("Columns", f"{validation_result.column_count:,}")
+
+    st.subheader("Preview")
+    st.dataframe(dataframe.head(10), use_container_width=True)
+
+    type_summary = pd.DataFrame({
+        "column": dataframe.columns,
+        "data_type": dataframe.dtypes.astype(str).values,
+    })
+    missing_summary = pd.DataFrame({
+        "column": dataframe.columns,
+        "missing_values": dataframe.isna().sum().values,
+    })
+    summary_columns = st.columns(2)
+    with summary_columns[0]:
+        st.subheader("Data Types")
+        st.dataframe(type_summary, hide_index=True, use_container_width=True)
+    with summary_columns[1]:
+        st.subheader("Missing Values")
+        st.dataframe(missing_summary, hide_index=True, use_container_width=True)

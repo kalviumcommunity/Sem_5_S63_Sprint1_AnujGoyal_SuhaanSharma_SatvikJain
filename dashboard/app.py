@@ -12,7 +12,8 @@ from dashboard.views import (
     view_dropout_risk,
     view_behaviour_trends,
     view_sql_insights,
-    view_reports
+    view_reports,
+    view_dataset_upload
 )
 
 
@@ -39,7 +40,8 @@ def main() -> None:
             "Dropout Risk",
             "Behaviour Trends",
             "SQL Insights",
-            "Reports"
+            "Reports",
+            "Dataset Upload"
         ]
     )
 
@@ -58,6 +60,8 @@ def main() -> None:
         view_sql_insights()
     elif page == "Reports":
         view_reports()
+    elif page == "Dataset Upload":
+        view_dataset_upload()
 
 
 if __name__ == "__main__":
