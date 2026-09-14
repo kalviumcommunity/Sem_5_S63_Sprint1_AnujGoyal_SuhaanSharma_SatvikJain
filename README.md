@@ -1421,6 +1421,14 @@ Report
 
 This pipeline can be executed automatically.
 
+The production entry point is `src.pipeline.run_pipeline()`. It executes
+ingestion, intake validation, cleaning, Student 360 feature engineering,
+analysis, SQLite replacement updates, and analytical output generation with
+stage-level logs and a structured success/failure result. SQLite writes use
+`replace` semantics so rerunning the same source is idempotent rather than
+appending duplicate records. Pass `source_data`, `source_dir`, `db_path`, and
+`output_dir` when embedding the pipeline or testing it with isolated paths.
+
 ---
 
 ### 49. GitHub Workflow Automation & Validation
