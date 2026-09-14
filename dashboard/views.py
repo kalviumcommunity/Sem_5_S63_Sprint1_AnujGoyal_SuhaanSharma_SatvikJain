@@ -36,6 +36,13 @@ from src.visualization import (
 )
 from src.database import execute_analytical_views
 from dashboard.filters import DashboardFilters, calculate_filtered_kpis
+from dashboard.state import (
+    UPLOAD_WIDGET_KEY,
+    get_uploaded_dataset,
+    initialize_session_state,
+    store_uploaded_dataset,
+    upload_signature,
+)
 from dashboard.utils import load_uploaded_dataset
 
 
@@ -249,6 +256,7 @@ def view_reports(
 
 def view_dataset_upload() -> None:
     """Renders the CSV/JSON upload and dataset preview page."""
+    initialize_session_state()
     st.header("Dataset Upload & Preview")
     st.caption("Inspect a dataset before using it in the learning analytics workflow.")
 
@@ -256,19 +264,31 @@ def view_dataset_upload() -> None:
         "Upload a CSV or JSON dataset",
         type=["csv", "json"],
         accept_multiple_files=False,
+        key=UPLOAD_WIDGET_KEY,
     )
-    if uploaded_file is None:
+    if uploaded_file is not None:
+        signature = upload_signature(uploaded_file)
+        if signature != st.session_state.get("dashboard_upload_signature"):
+            dataframe, validation_result = load_uploaded_dataset(uploaded_file)
+            store_uploaded_dataset(
+                dataframe,
+                uploaded_file.name,
+                validation_result,
+                signature,
+            )
+
+    dataframe, filename, validation_result = get_uploaded_dataset()
+    if validation_result is None:
         st.info("Upload a CSV or JSON file to preview its structure.")
         return
 
-    dataframe, validation_result = load_uploaded_dataset(uploaded_file)
     if not validation_result.is_valid:
-        st.error(f"Upload validation failed for '{uploaded_file.name}'.")
+        st.error(f"Upload validation failed for '{filename}'.")
         for error in validation_result.errors:
             st.write(f"- {error}")
         return
 
-    st.success(f"'{uploaded_file.name}' passed validation.")
+    st.success(f"'{filename}' passed validation.")
     metric_columns = st.columns(2)
     metric_columns[0].metric("Rows", f"{validation_result.row_count:,}")
     metric_columns[1].metric("Columns", f"{validation_result.column_count:,}")

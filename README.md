@@ -1297,6 +1297,12 @@ Use Streamlit session state to preserve:
 
 This prevents the application from feeling like a collection of disconnected pages.
 
+Session-state keys and lifecycle helpers are centralized in
+`dashboard/state.py`. Filter widgets use stable keys and preserve valid choices
+when available dataset options change. Uploaded datasets are retained by
+content signature, so reruns do not reparse the same file or discard the
+preview state.
+
 ---
 
 ### 45. Real-Time KPI Dashboard Development
