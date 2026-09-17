@@ -20,6 +20,47 @@ from dashboard.views import (
 )
 
 
+DATA_UPLOAD_PAGE = "Data Upload"
+NAVIGATION_PAGES = (
+    "Overview",
+    "Student Behaviour",
+    "Course Analytics",
+    "Dropout Risk",
+    "Behaviour Trends",
+    "SQL Insights",
+    "Reports",
+)
+
+PAGE_VIEWS = {
+    "Overview": view_overview,
+    "Student Behaviour": view_student_behaviour,
+    "Course Analytics": view_course_analytics,
+    "Dropout Risk": view_dropout_risk,
+    "Behaviour Trends": view_behaviour_trends,
+    "SQL Insights": view_sql_insights,
+    "Reports": view_reports,
+}
+
+
+def _load_analytical_views() -> dict:
+    """Load the shared SQL view bundle used by every analytics page."""
+    try:
+        return execute_analytical_views()
+    except Exception as error:
+        st.sidebar.warning(
+            "Analytical data is currently unavailable. Run the data pipeline "
+            f"before refreshing the dashboard. ({error})"
+        )
+        return {}
+
+
+def _render_page(page: str, views: dict, filters) -> None:
+    """Dispatch a selected page to its existing dashboard view function."""
+    page_view = PAGE_VIEWS.get(page)
+    if page_view is not None:
+        page_view(views=views, filters=filters)
+
+
 def main() -> None:
     st.set_page_config(
         page_title="Learning Behaviour & Course Completion Intelligence",
@@ -35,45 +76,21 @@ def main() -> None:
     )
 
     st.sidebar.title("Navigation")
+    st.sidebar.caption("Explore the learning analytics workspace")
     page = st.sidebar.radio(
-        "Select View",
-        [
-            "Overview",
-            "Student Behaviour",
-            "Course Analytics",
-            "Dropout Risk",
-            "Behaviour Trends",
-            "SQL Insights",
-            "Reports",
-            "Dataset Upload"
-        ],
+        "Select page",
+        [*NAVIGATION_PAGES, DATA_UPLOAD_PAGE],
         key=PAGE_KEY,
     )
 
-    if page == "Dataset Upload":
+    if page == DATA_UPLOAD_PAGE:
         view_dataset_upload()
-    else:
-        try:
-            raw_views = execute_analytical_views()
-        except Exception:
-            raw_views = {}
-        filters = render_filter_sidebar(raw_views)
-        filtered_views = filter_dashboard_views(raw_views, filters)
+        return
 
-        if page == "Overview":
-            view_overview(views=filtered_views, filters=filters)
-        elif page == "Student Behaviour":
-            view_student_behaviour(views=filtered_views, filters=filters)
-        elif page == "Course Analytics":
-            view_course_analytics(views=filtered_views, filters=filters)
-        elif page == "Dropout Risk":
-            view_dropout_risk(views=filtered_views, filters=filters)
-        elif page == "Behaviour Trends":
-            view_behaviour_trends(views=filtered_views, filters=filters)
-        elif page == "SQL Insights":
-            view_sql_insights(views=filtered_views, filters=filters)
-        elif page == "Reports":
-            view_reports(views=filtered_views, filters=filters)
+    raw_views = _load_analytical_views()
+    filters = render_filter_sidebar(raw_views)
+    filtered_views = filter_dashboard_views(raw_views, filters)
+    _render_page(page, filtered_views, filters)
 
 
 if __name__ == "__main__":
