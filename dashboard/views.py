@@ -73,7 +73,7 @@ def view_overview(
     views = _resolve_views(db_path, views)
     kpi_data = calculate_realtime_kpis(views) if filters is not None else get_business_kpis(db_path=db_path)
 
-    render_kpi_summary_grid(kpi_data, columns=6)
+    render_kpi_summary_grid(kpi_data, columns=4)
     render_alert_panel(
         evaluate_metric_alerts(
             kpi_data,

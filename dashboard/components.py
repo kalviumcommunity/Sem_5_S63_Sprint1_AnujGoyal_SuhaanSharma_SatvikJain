@@ -47,16 +47,11 @@ def render_kpi_card(
 
 def render_kpi_summary_grid(
     kpi_dict: Optional[Dict[str, Any]] = None,
-    columns: int = 6
+    columns: int = 4
 ) -> Dict[str, Dict[str, Any]]:
     """
     Renders a responsive Streamlit grid of KPI summary metric cards displaying:
-    1. Completion Rate
-    2. Dropout Rate
-    3. Active Learners
-    4. At-Risk Learners
-    5. Average Quiz Score
-    6. Average Session Duration
+    Eight filtered dashboard KPI cards.
 
     Args:
         kpi_dict: Raw KPI dictionary (or empty to use formatted defaults)

@@ -266,6 +266,7 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
             "active_learner_count": 0,
             "avg_quiz_score_pct": 0.0,
             "avg_session_duration_minutes": 0.0,
+            "avg_course_progress_pct": 0.0,
             "at_risk_learner_count": 0,
             "completion_rate_delta": None,
             "dropout_rate_delta": None,
@@ -273,12 +274,14 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
             "at_risk_learners_delta": None,
             "avg_quiz_score_delta": None,
             "avg_session_duration_delta": None,
+            "avg_course_progress_delta": None,
         }
 
     total = len(dataframe)
     statuses = dataframe.get("completion_status", pd.Series(index=dataframe.index, dtype=str)).astype(str).str.lower()
     quiz_scores = pd.to_numeric(dataframe.get("quiz_average", 0), errors="coerce")
     session_duration = pd.to_numeric(dataframe.get("avg_session_duration", 0), errors="coerce")
+    course_progress = pd.to_numeric(dataframe.get("course_progress", 0), errors="coerce")
     risk = dataframe.get("dropout_risk_level", pd.Series(index=dataframe.index, dtype=str)).astype(str).str.lower()
     return {
         "total_students": total,
@@ -287,6 +290,7 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
         "active_learner_count": dataframe.get("student_id", pd.Series(dtype=str)).nunique(),
         "avg_quiz_score_pct": round(quiz_scores.mean(), 2),
         "avg_session_duration_minutes": round(session_duration.mean(), 2),
+        "avg_course_progress_pct": round(course_progress.mean(), 2),
         "at_risk_learner_count": int(risk.isin(["high", "critical"]).sum()),
         "completion_rate_delta": None,
         "dropout_rate_delta": None,
@@ -294,6 +298,7 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
         "at_risk_learners_delta": None,
         "avg_quiz_score_delta": None,
         "avg_session_duration_delta": None,
+        "avg_course_progress_delta": None,
     }
 
 
