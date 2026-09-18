@@ -50,6 +50,34 @@ def test_sync_filter_options_preserves_valid_choices_and_prunes_removed_values()
     assert state[FILTER_KEYS["date_range"]] == (date(2026, 1, 5), date(2026, 2, 28))
 
 
+def test_sync_filter_options_keeps_empty_selection_as_all():
+    state = {}
+    initialize_session_state(state)
+
+    sync_filter_options(
+        {"courses": ["Python", "SQL"], "risk_levels": ["Low", "Critical"]},
+        (date(2026, 1, 1), date(2026, 2, 28)),
+        state,
+    )
+
+    assert state[FILTER_KEYS["courses"]] == []
+    assert state[FILTER_KEYS["risk_levels"]] == []
+
+
+def test_initialize_session_state_preserves_page_and_filter_selections():
+    state = {}
+    initialize_session_state(state)
+    state["dashboard_page"] = "Reports"
+    state[FILTER_KEYS["courses"]] = ["Python"]
+    state[FILTER_KEYS["date_range"]] = (date(2026, 1, 5), date(2026, 1, 31))
+
+    initialize_session_state(state)
+
+    assert state["dashboard_page"] == "Reports"
+    assert state[FILTER_KEYS["courses"]] == ["Python"]
+    assert state[FILTER_KEYS["date_range"]] == (date(2026, 1, 5), date(2026, 1, 31))
+
+
 def test_uploaded_dataset_state_round_trip_and_clear():
     state = {}
     dataframe = pd.DataFrame({"student_id": ["S001"]})
