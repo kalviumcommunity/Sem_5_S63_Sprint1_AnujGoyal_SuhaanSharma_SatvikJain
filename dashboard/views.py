@@ -11,6 +11,7 @@ Contains view handler functions for the dashboard navigation pages:
 7. Reports
 """
 
+from pathlib import Path
 from typing import Optional, Any
 import streamlit as st
 import pandas as pd
@@ -310,12 +311,22 @@ def view_dataset_upload() -> None:
         return
 
     st.success(f"'{filename}' passed validation.")
-    metric_columns = st.columns(2)
-    metric_columns[0].metric("Rows", f"{validation_result.row_count:,}")
-    metric_columns[1].metric("Columns", f"{validation_result.column_count:,}")
+    file_type = Path(filename).suffix.lstrip(".").upper()
+    metric_columns = st.columns(4)
+    metric_columns[0].metric("File name", filename)
+    metric_columns[1].metric("File type", file_type)
+    metric_columns[2].metric("Rows", f"{validation_result.row_count:,}")
+    metric_columns[3].metric("Columns", f"{validation_result.column_count:,}")
 
     st.subheader("Preview")
     st.dataframe(dataframe.head(10), use_container_width=True)
+
+    st.subheader("Column Names")
+    st.dataframe(
+        pd.DataFrame({"column": dataframe.columns}),
+        hide_index=True,
+        use_container_width=True,
+    )
 
     type_summary = pd.DataFrame({
         "column": dataframe.columns,

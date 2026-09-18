@@ -41,6 +41,26 @@ def test_load_uploaded_empty_file_fails_source_validation():
     assert any("0 bytes" in error for error in result.errors)
 
 
+def test_load_uploaded_header_only_csv_fails_dataset_validation():
+    dataframe, result = load_uploaded_dataset(
+        uploaded_file("header-only.csv", "student_id,minutes\n")
+    )
+
+    assert dataframe.empty
+    assert result.is_valid is False
+    assert any("empty" in error.lower() for error in result.errors)
+
+
+def test_load_uploaded_malformed_json_fails_with_clear_error():
+    dataframe, result = load_uploaded_dataset(
+        uploaded_file("broken.json", '{"student_id":')
+    )
+
+    assert dataframe.empty
+    assert result.is_valid is False
+    assert any("malformed" in error.lower() for error in result.errors)
+
+
 def test_load_uploaded_unsupported_file_fails_source_validation():
     dataframe, result = load_uploaded_dataset(uploaded_file("activity.txt", "student_id\nS001\n"))
 
