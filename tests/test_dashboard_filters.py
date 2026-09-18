@@ -26,7 +26,47 @@ def sample_views():
         "avg_session_duration": [45.0, 15.0, 30.0],
         "course_progress": [100.0, 20.0, 55.0],
     })
-    return {"student_engagement_view": learners}
+    risk = learners[[
+        "student_id",
+        "target_course_id",
+        "course_title",
+        "completion_status",
+        "dropout_risk_level",
+        "quiz_average",
+        "engagement_score",
+    ]].copy()
+    return {
+        "student_engagement_view": learners,
+        "dropout_risk_view": risk,
+    }
+
+
+def test_no_filters_returns_all_real_learner_rows_and_chart_rows():
+    filtered = filter_dashboard_views(sample_views(), DashboardFilters())
+
+    assert len(filtered["student_engagement_view"]) == 3
+    assert len(filtered["dropout_risk_view"]) == 3
+    assert calculate_realtime_kpis(filtered)["total_students"] == 3
+
+
+def test_quiz_range_and_engagement_level_filter_real_scores():
+    filters = DashboardFilters(
+        quiz_score_range=(70.0, 90.0),
+        engagement_levels=["High"],
+    )
+
+    filtered = filter_dashboard_views(sample_views(), filters)
+
+    assert filtered["student_engagement_view"]["student_id"].tolist() == ["S001"]
+
+
+def test_filtered_learner_ids_propagate_to_risk_chart_input():
+    filters = DashboardFilters(date_range=(date(2026, 2, 1), date(2026, 2, 28)))
+
+    filtered = filter_dashboard_views(sample_views(), filters)
+
+    assert filtered["student_engagement_view"]["student_id"].tolist() == ["S002", "S003"]
+    assert filtered["dropout_risk_view"]["student_id"].tolist() == ["S002", "S003"]
 
 
 def test_filter_dashboard_views_applies_shared_selections():

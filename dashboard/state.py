@@ -25,6 +25,8 @@ FILTER_KEYS = {
     "completion_statuses": "dashboard_filter_completion_statuses",
     "risk_levels": "dashboard_filter_risk_levels",
     "learner_segments": "dashboard_filter_learner_segments",
+    "engagement_levels": "dashboard_filter_engagement_levels",
+    "quiz_score_range": "dashboard_filter_quiz_score_range",
     "minimum_quiz_score": "dashboard_filter_minimum_quiz_score",
 }
 
@@ -50,6 +52,8 @@ def initialize_session_state(session_state: Optional[MutableMapping[str, Any]] =
         FILTER_KEYS["completion_statuses"]: [],
         FILTER_KEYS["risk_levels"]: [],
         FILTER_KEYS["learner_segments"]: [],
+        FILTER_KEYS["engagement_levels"]: [],
+        FILTER_KEYS["quiz_score_range"]: (0.0, 100.0),
         FILTER_KEYS["minimum_quiz_score"]: 0.0,
     }
     for key, value in defaults.items():
@@ -66,7 +70,13 @@ def sync_filter_options(
     initialize_session_state(state)
     previous_options = state[FILTER_OPTIONS_KEY]
 
-    for name in ["courses", "completion_statuses", "risk_levels", "learner_segments"]:
+    for name in [
+        "courses",
+        "completion_statuses",
+        "risk_levels",
+        "learner_segments",
+        "engagement_levels",
+    ]:
         key = FILTER_KEYS[name]
         available = options.get(name, [])
         current = state[key]
