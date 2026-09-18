@@ -80,10 +80,7 @@ def sync_filter_options(
         key = FILTER_KEYS[name]
         available = options.get(name, [])
         current = state[key]
-        if name not in previous_options or (not previous_options[name] and available):
-            state[key] = list(available)
-        else:
-            state[key] = [value for value in current if value in available]
+        state[key] = [value for value in current if value in available]
         previous_options[name] = list(available)
 
     if date_bounds:
