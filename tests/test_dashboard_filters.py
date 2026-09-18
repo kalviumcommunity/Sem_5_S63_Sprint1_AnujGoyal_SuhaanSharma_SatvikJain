@@ -101,6 +101,7 @@ def test_filtered_kpis_use_the_filtered_learner_view():
     assert kpis["completion_rate_pct"] == 50.0
     assert kpis["dropout_rate_pct"] == 50.0
     assert kpis["avg_quiz_score_pct"] == 61.5
+    assert kpis["avg_course_progress_pct"] == 60.0
     assert kpis["at_risk_learner_count"] == 1
 
 
@@ -159,4 +160,5 @@ def test_zero_result_selection_returns_zero_cards_without_demo_values():
     assert cards["completion_rate"]["value"] == "0.0%"
     assert cards["active_learners"]["value"] == "0"
     assert cards["avg_quiz_score"]["value"] == "0.0%"
+    assert cards["avg_course_progress"]["value"] == "0.0%"
     assert cards["completion_rate"]["delta"] is None

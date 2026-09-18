@@ -17,18 +17,20 @@ def test_format_metric():
 
 
 def test_format_kpi_summary_default_values():
-    """Verify default formatting for all 6 required KPI summary metrics."""
+    """Verify default formatting for all dashboard KPI summary metrics."""
     summary = format_kpi_summary({})
     assert isinstance(summary, dict)
-    assert len(summary) == 6
+    assert len(summary) == 8
 
     required_keys = [
+        "total_students",
         "completion_rate",
         "dropout_rate",
         "active_learners",
         "at_risk_learners",
         "avg_quiz_score",
-        "avg_session_duration"
+        "avg_session_duration",
+        "avg_course_progress",
     ]
     for key in required_keys:
         assert key in summary
@@ -38,13 +40,15 @@ def test_format_kpi_summary_default_values():
         assert "delta" in card
         assert "help_text" in card
 
-    assert summary["completion_rate"]["label"] == "Completion Rate"
+    assert summary["completion_rate"]["label"] == "Course Completion Rate"
     assert "%" in summary["completion_rate"]["value"]
 
     assert summary["dropout_rate"]["label"] == "Dropout Rate"
     assert "%" in summary["dropout_rate"]["value"]
 
     assert summary["active_learners"]["label"] == "Active Learners"
+
+    assert summary["total_students"]["label"] == "Total Students"
 
     assert summary["at_risk_learners"]["label"] == "At-Risk Learners"
 
@@ -53,6 +57,9 @@ def test_format_kpi_summary_default_values():
 
     assert summary["avg_session_duration"]["label"] == "Avg Session Duration"
     assert "mins" in summary["avg_session_duration"]["value"]
+
+    assert summary["avg_course_progress"]["label"] == "Average Course Progress"
+    assert "%" in summary["avg_course_progress"]["value"]
 
 
 def test_format_kpi_summary_custom_input():
@@ -64,6 +71,8 @@ def test_format_kpi_summary_custom_input():
         "at_risk_learner_count": 18,
         "avg_quiz_score_pct": 84.2,
         "avg_session_duration_minutes": 52.3,
+        "total_students": 3000,
+        "avg_course_progress_pct": 64.7,
         "completion_rate_delta": "+5.0%",
         "dropout_rate_delta": "-2.1%"
     }
@@ -72,9 +81,11 @@ def test_format_kpi_summary_custom_input():
     assert summary["completion_rate"]["delta"] == "+5.0%"
     assert summary["dropout_rate"]["value"] == "10.4%"
     assert summary["active_learners"]["value"] == "2,400"
+    assert summary["total_students"]["value"] == "3,000"
     assert summary["at_risk_learners"]["value"] == "18"
     assert summary["avg_quiz_score"]["value"] == "84.2%"
     assert summary["avg_session_duration"]["value"] == "52.3 mins"
+    assert summary["avg_course_progress"]["value"] == "64.7%"
 
 
 def test_render_kpi_summary_grid_structure():
