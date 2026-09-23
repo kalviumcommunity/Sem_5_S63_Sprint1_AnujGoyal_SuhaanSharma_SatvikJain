@@ -270,9 +270,10 @@ def view_reports(
         current_kpis,
         thresholds=AlertThresholds(),
         weekly_activity=views.get("weekly_activity_view"),
+        learner_activity=views.get("student_engagement_view"),
     )
     render_report_sharing(
-        build_periodic_summary(current_kpis, views, current_alerts),
+        build_periodic_summary(current_kpis, views, current_alerts, report_data=report_data),
         get_email_sender(),
     )
 

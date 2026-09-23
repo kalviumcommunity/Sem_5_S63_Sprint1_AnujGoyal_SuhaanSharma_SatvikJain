@@ -28,11 +28,15 @@ class DeliveryResult:
     message: str
 
 
-class EmailSender(Protocol):
-    """Mockable contract for report delivery providers."""
+class EmailService(Protocol):
+    """Provider-independent contract for report delivery adapters."""
 
     def send(self, recipient: str, summary: PeriodicSummary) -> DeliveryResult:
         ...
+
+
+# Keep the original name available to existing dashboard integrations.
+EmailSender = EmailService
 
 
 def _format_kpi_lines(kpis: Dict[str, Any]) -> List[str]:
@@ -63,11 +67,36 @@ def _trend_lines(views: Dict[str, pd.DataFrame]) -> List[str]:
     ]
 
 
+def _insight_lines(
+    kpis: Dict[str, Any],
+    views: Dict[str, pd.DataFrame],
+    report_data: Optional[Dict[str, Any]] = None,
+) -> List[str]:
+    """Build concise analytical insights from the existing report inputs."""
+    lines = [
+        f"- Overall monitoring status is derived from current KPI and alert data.",
+        f"- {int(kpis.get('at_risk_learner_count', 0) or 0):,} learners are currently in the high or critical risk population.",
+    ]
+    weekly = views.get("weekly_activity_view", pd.DataFrame())
+    if not weekly.empty and "active_learners" in weekly.columns:
+        active = pd.to_numeric(weekly["active_learners"], errors="coerce").dropna()
+        if not active.empty:
+            lines.append(f"- The latest weekly activity view contains {int(active.iloc[-1]):,} active learners.")
+    for finding in (report_data or {}).get("major_behavioural_findings", {}).get("findings", [])[:3]:
+        lines.append(f"- {finding.get('finding', 'Behavioural trend')}: {finding.get('detail', '')}")
+    for section in ["completion_analysis", "dropout_analysis", "learner_engagement"]:
+        takeaway = (report_data or {}).get(section, {}).get("key_takeaway")
+        if takeaway:
+            lines.append(f"- Analytical insight: {takeaway}")
+    return lines
+
+
 def build_periodic_summary(
     kpis: Dict[str, Any],
     views: Dict[str, pd.DataFrame],
     alerts: List[MetricAlert],
     period_label: str = "Current filtered period",
+    report_data: Optional[Dict[str, Any]] = None,
 ) -> PeriodicSummary:
     """Build a concise summary from live KPIs, trends, alerts, and insights."""
     alert_lines = [
@@ -78,10 +107,8 @@ def build_periodic_summary(
     if not alert_lines:
         alert_lines = ["- No warning or critical metric alerts are active."]
 
-    insight_lines = [
-        f"- Overall monitoring status is {overall_alert_status(alerts)}.",
-        "- Use the course and learner-level trends to prioritize retention support and course improvements.",
-    ]
+    insight_lines = _insight_lines(kpis, views, report_data=report_data)
+    insight_lines.insert(0, f"- Overall monitoring status is {overall_alert_status(alerts)}.")
     sections = [
         f"# Learning Analytics Summary: {period_label}",
         "",
@@ -106,7 +133,7 @@ def build_periodic_summary(
     )
 
 
-class SmtpEmailSender:
+class SmtpEmailService:
     """SMTP implementation configured exclusively through environment variables."""
 
     def __init__(self, environ: Optional[Dict[str, str]] = None) -> None:
@@ -119,9 +146,13 @@ class SmtpEmailSender:
         sender = self.environ.get("LEARNING_ANALYTICS_REPORT_FROM")
         if not all([host, username, password, sender]):
             return None
+        try:
+            port = int(self.environ.get("LEARNING_ANALYTICS_SMTP_PORT", "587"))
+        except ValueError:
+            return None
         return {
             "host": host,
-            "port": int(self.environ.get("LEARNING_ANALYTICS_SMTP_PORT", "587")),
+            "port": port,
             "username": username,
             "password": password,
             "sender": sender,
@@ -133,7 +164,7 @@ class SmtpEmailSender:
         if configuration is None:
             return DeliveryResult(
                 "NOT_CONFIGURED",
-                "Email delivery is not configured. Set the SMTP environment variables to enable it.",
+                "Email delivery is unavailable. Set the SMTP environment variables to enable it.",
             )
         if not recipient.strip():
             return DeliveryResult("INVALID_RECIPIENT", "Enter a recipient email address before sending.")
@@ -156,6 +187,28 @@ class SmtpEmailSender:
         return DeliveryResult("SENT", "The learning analytics summary was sent successfully.")
 
 
-def get_email_sender(environ: Optional[Dict[str, str]] = None) -> EmailSender:
+class SmtpEmailSender(SmtpEmailService):
+    """Backward-compatible name for the SMTP email service."""
+
+
+class MockEmailService:
+    """In-memory email adapter for tests and local UI demonstrations."""
+
+    def __init__(self) -> None:
+        self.sent_messages: List[Dict[str, str]] = []
+
+    def send(self, recipient: str, summary: PeriodicSummary) -> DeliveryResult:
+        if not recipient.strip():
+            return DeliveryResult("INVALID_RECIPIENT", "Enter a recipient email address before sending.")
+        self.sent_messages.append({
+            "recipient": recipient.strip(),
+            "subject": summary.subject,
+            "plain_text": summary.plain_text,
+            "markdown": summary.markdown,
+        })
+        return DeliveryResult("SENT", "The learning analytics summary was accepted by the mock email service.")
+
+
+def get_email_sender(environ: Optional[Dict[str, str]] = None) -> EmailService:
     """Build the configured email provider without exposing credentials to the UI."""
-    return SmtpEmailSender(environ=environ)
+    return SmtpEmailService(environ=environ)

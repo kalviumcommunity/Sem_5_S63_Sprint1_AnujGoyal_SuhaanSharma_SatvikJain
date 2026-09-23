@@ -5,6 +5,7 @@ import pandas as pd
 from dashboard.alerts import WARNING, MetricAlert
 from dashboard.sharing import (
     DeliveryResult,
+    MockEmailService,
     PeriodicSummary,
     SmtpEmailSender,
     build_periodic_summary,
@@ -31,6 +32,12 @@ def test_periodic_summary_contains_kpis_trends_alerts_and_insights():
         },
         views,
         alerts,
+        report_data={
+            "major_behavioural_findings": {
+                "findings": [{"finding": "Consistency", "detail": "Regular study supports retention."}]
+            },
+            "completion_analysis": {"key_takeaway": "Early progress supports completion."},
+        },
     )
 
     assert isinstance(summary, PeriodicSummary)
@@ -38,6 +45,8 @@ def test_periodic_summary_contains_kpis_trends_alerts_and_insights():
     assert "Strongest course completion: Python" in summary.markdown
     assert "WARNING: Dropout rate" in summary.markdown
     assert "Important Insights" in summary.markdown
+    assert "Consistency: Regular study supports retention." in summary.markdown
+    assert "Early progress supports completion." in summary.markdown
 
 
 def test_email_sender_is_safe_when_environment_is_not_configured():
@@ -60,3 +69,27 @@ def test_email_sender_rejects_empty_recipient_before_delivery():
     result = sender.send("", PeriodicSummary("Subject", "# Report", "Report"))
 
     assert result.status == "INVALID_RECIPIENT"
+
+
+def test_mock_email_service_records_report_without_network_delivery():
+    service = MockEmailService()
+    summary = PeriodicSummary("Subject", "# Report", "Report")
+
+    result = service.send("stakeholder@example.com", summary)
+
+    assert result.status == "SENT"
+    assert service.sent_messages == [{
+        "recipient": "stakeholder@example.com",
+        "subject": "Subject",
+        "plain_text": "Report",
+        "markdown": "# Report",
+    }]
+
+
+def test_mock_email_service_rejects_empty_recipient():
+    service = MockEmailService()
+
+    result = service.send("  ", PeriodicSummary("Subject", "# Report", "Report"))
+
+    assert result.status == "INVALID_RECIPIENT"
+    assert service.sent_messages == []
