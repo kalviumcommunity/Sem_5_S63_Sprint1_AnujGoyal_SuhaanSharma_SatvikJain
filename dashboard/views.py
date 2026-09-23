@@ -79,6 +79,7 @@ def view_overview(
             kpi_data,
             thresholds=AlertThresholds(),
             weekly_activity=views.get("weekly_activity_view"),
+            learner_activity=views.get("student_engagement_view"),
         )
     )
     st.divider()
