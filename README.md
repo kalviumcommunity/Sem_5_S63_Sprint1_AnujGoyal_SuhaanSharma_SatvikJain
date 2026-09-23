@@ -93,11 +93,11 @@ The ingestion contract expects these entity files in `data/raw/`:
 | `quizzes.csv` or `quizzes.json` | attempts, scores, pass flags, dates |
 
 The repository currently contains sample/raw-workflow fixtures rather than all
-four named entity files, so the default pipeline reports a successful logged
-no-op until those sources are supplied. Uploads support CSV and JSON through the
-dashboard. Definitions, required fields, valid domains, and analytical use are
-documented in [docs/data_dictionary.md](docs/data_dictionary.md) and encoded in
-[src/data_dictionary.py](src/data_dictionary.py).
+four named entity files, so the default pipeline fails clearly at source
+validation until those sources are supplied. Uploads support CSV and JSON
+through the dashboard. Definitions, required fields, valid domains, and
+analytical use are documented in [docs/data_dictionary.md](docs/data_dictionary.md)
+and encoded in [src/data_dictionary.py](src/data_dictionary.py).
 
 ### Architecture and Pipeline
 
