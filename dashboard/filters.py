@@ -268,6 +268,7 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
             "avg_session_duration_minutes": 0.0,
             "avg_course_progress_pct": 0.0,
             "at_risk_learner_count": 0,
+            "engagement_rate_pct": None,
             "completion_rate_delta": None,
             "dropout_rate_delta": None,
             "active_learners_delta": None,
@@ -282,6 +283,7 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
     quiz_scores = pd.to_numeric(dataframe.get("quiz_average", 0), errors="coerce")
     session_duration = pd.to_numeric(dataframe.get("avg_session_duration", 0), errors="coerce")
     course_progress = pd.to_numeric(dataframe.get("course_progress", 0), errors="coerce")
+    engagement_score = pd.to_numeric(dataframe.get("engagement_score", pd.Series(dtype=float)), errors="coerce")
     risk = dataframe.get("dropout_risk_level", pd.Series(index=dataframe.index, dtype=str)).astype(str).str.lower()
     return {
         "total_students": total,
@@ -292,6 +294,7 @@ def calculate_realtime_kpis(views: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
         "avg_session_duration_minutes": round(session_duration.mean(), 2),
         "avg_course_progress_pct": round(course_progress.mean(), 2),
         "at_risk_learner_count": int(risk.isin(["high", "critical"]).sum()),
+        "engagement_rate_pct": round(float(engagement_score.mean()), 2) if not engagement_score.dropna().empty else None,
         "completion_rate_delta": None,
         "dropout_rate_delta": None,
         "active_learners_delta": None,

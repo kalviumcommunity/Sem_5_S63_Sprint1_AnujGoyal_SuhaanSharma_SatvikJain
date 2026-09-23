@@ -1,4 +1,4 @@
-"""Configurable business-metric threshold monitoring for the dashboard."""
+"""Reusable configurable threshold monitoring for learning analytics metrics."""
 
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
@@ -21,8 +21,15 @@ class AlertThresholds:
     completion_critical_pct: float = 40.0
     at_risk_warning_pct: float = 25.0
     at_risk_critical_pct: float = 40.0
-    engagement_decline_warning_pct: float = 10.0
-    engagement_decline_critical_pct: float = 25.0
+    weekly_active_learners_warning: float = 100.0
+    weekly_active_learners_critical: float = 50.0
+    engagement_rate_warning_pct: float = 60.0
+    engagement_rate_critical_pct: float = 40.0
+    activity_decline_warning_pct: float = 10.0
+    activity_decline_critical_pct: float = 25.0
+    # Backward-compatible names used by existing dashboard integrations.
+    engagement_decline_warning_pct: Optional[float] = None
+    engagement_decline_critical_pct: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -34,6 +41,7 @@ class MetricAlert:
     observed_value: float
     threshold: Optional[float]
     explanation: str
+    data_available: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -42,6 +50,7 @@ class MetricAlert:
             "observed_value": self.observed_value,
             "threshold": self.threshold,
             "explanation": self.explanation,
+            "data_available": self.data_available,
         }
 
 
@@ -67,8 +76,9 @@ def _alert(
     value: float,
     threshold: Optional[float],
     explanation: str,
+    data_available: bool = True,
 ) -> MetricAlert:
-    return MetricAlert(metric, status, round(float(value), 2), threshold, explanation)
+    return MetricAlert(metric, status, round(float(value), 2), threshold, explanation, data_available)
 
 
 def _threshold_explanation(
@@ -82,12 +92,72 @@ def _threshold_explanation(
     return f"{value:.1f}% {action_text}"
 
 
-def _engagement_decline_pct(weekly_activity: Optional[pd.DataFrame]) -> Optional[float]:
-    """Calculate the latest week-over-week active-minute decline, when available."""
+def _number(value: Any) -> Optional[float]:
+    """Return a finite numeric value, preserving missing-data semantics."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    number = pd.to_numeric(value, errors="coerce")
+    return float(number) if pd.notna(number) else None
+
+
+def _threshold_for_status(status: str, warning: float, critical: float) -> float:
+    return critical if status == CRITICAL else warning
+
+
+def _minimum_alert(
+    metric: str,
+    value: Optional[float],
+    warning: float,
+    critical: float,
+    label: str,
+) -> MetricAlert:
+    if value is None:
+        return _alert(
+            metric, NORMAL, 0.0, warning,
+            f"Not enough data to evaluate {label}; no alert was raised.", False,
+        )
+    status = _lower_is_worse(value, warning, critical)
+    threshold = _threshold_for_status(status, warning, critical)
+    if status == NORMAL:
+        explanation = f"{label} is {value:.1f}, at or above the minimum threshold of {warning:.1f}."
+    else:
+        explanation = f"{label} is {value:.1f}, below the {status.lower()} threshold of {threshold:.1f}."
+    return _alert(metric, status, value, threshold, explanation)
+
+
+def _percentage_alert(
+    metric: str,
+    value: Optional[float],
+    warning: float,
+    critical: float,
+    label: str,
+    higher_is_worse: bool,
+) -> MetricAlert:
+    if value is None:
+        return _alert(
+            metric, NORMAL, 0.0, warning,
+            f"Not enough data to evaluate {label}; no alert was raised.", False,
+        )
+    status = (
+        _higher_is_worse(value, warning, critical)
+        if higher_is_worse
+        else _lower_is_worse(value, warning, critical)
+    )
+    threshold = _threshold_for_status(status, warning, critical)
+    if status == NORMAL:
+        explanation = f"{label} is {value:.1f}%, within the acceptable range."
+    else:
+        action = "; retention intervention is needed" if metric == "Dropout Rate" else ""
+        explanation = f"{label} is {value:.1f}%, crossing the {status.lower()} threshold of {threshold:.1f}%{action}."
+    return _alert(metric, status, value, threshold, explanation)
+
+
+def _activity_decline_pct(weekly_activity: Optional[pd.DataFrame]) -> Optional[float]:
+    """Calculate the latest week-over-week activity decline, when available."""
     if weekly_activity is None or weekly_activity.empty:
         return None
     metric_column = next(
-        (column for column in ["avg_active_minutes", "avg_session_duration", "total_duration_minutes"] if column in weekly_activity.columns),
+        (column for column in ["active_learners", "avg_active_minutes", "avg_session_duration", "total_duration_minutes"] if column in weekly_activity.columns),
         None,
     )
     if metric_column is None or len(weekly_activity) < 2:
@@ -107,57 +177,38 @@ def evaluate_metric_alerts(
     kpis: Dict[str, Any],
     thresholds: AlertThresholds = AlertThresholds(),
     weekly_activity: Optional[pd.DataFrame] = None,
+    learner_activity: Optional[pd.DataFrame] = None,
 ) -> List[MetricAlert]:
-    """Evaluate configured thresholds and return one alert per monitored metric."""
-    dropout_rate = float(kpis.get("dropout_rate_pct", 0.0) or 0.0)
-    completion_rate = float(kpis.get("completion_rate_pct", 0.0) or 0.0)
-    total_learners = int(kpis.get("total_students", 0) or 0)
-    at_risk_count = int(kpis.get("at_risk_learner_count", 0) or 0)
-    at_risk_pct = (at_risk_count / total_learners * 100.0) if total_learners else 0.0
+    """Evaluate all configured metrics using live KPI and analytical-view data."""
+    decline_warning = thresholds.engagement_decline_warning_pct or thresholds.activity_decline_warning_pct
+    decline_critical = thresholds.engagement_decline_critical_pct or thresholds.activity_decline_critical_pct
+    total_learners = _number(kpis.get("total_students"))
+    at_risk_count = _number(kpis.get("at_risk_learner_count"))
+    at_risk_pct = (
+        at_risk_count / total_learners * 100.0
+        if total_learners and at_risk_count is not None and total_learners > 0
+        else _number(kpis.get("at_risk_percentage_pct"))
+    )
+    engagement_rate = _number(kpis.get("engagement_rate_pct", kpis.get("avg_engagement_score")))
+    if engagement_rate is None and learner_activity is not None and "engagement_score" in learner_activity:
+        scores = pd.to_numeric(learner_activity["engagement_score"], errors="coerce").dropna()
+        engagement_rate = float(scores.mean()) if not scores.empty else None
 
-    dropout_status = _higher_is_worse(dropout_rate, thresholds.dropout_warning_pct, thresholds.dropout_critical_pct)
-    completion_status = _lower_is_worse(completion_rate, thresholds.completion_warning_pct, thresholds.completion_critical_pct)
-    risk_status = _higher_is_worse(at_risk_pct, thresholds.at_risk_warning_pct, thresholds.at_risk_critical_pct)
-    alerts = [
-        _alert("Dropout rate", dropout_status, dropout_rate, thresholds.dropout_warning_pct, _threshold_explanation(
-            dropout_status, dropout_rate, "Dropout rate is within the retention policy.", "of selected learners are dropped; retention intervention is needed."
-        )),
-        _alert("Completion rate", completion_status, completion_rate, thresholds.completion_warning_pct, _threshold_explanation(
-            completion_status, completion_rate, "Completion rate is within the success policy.", "of selected learners are completing courses; review course friction and engagement."
-        )),
-        _alert("At-risk learner population", risk_status, at_risk_pct, thresholds.at_risk_warning_pct, _threshold_explanation(
-            risk_status, at_risk_pct, "At-risk learner population is within the support policy.", "of selected learners are high or critical risk; prioritize targeted support."
-        )),
+    weekly_active = None
+    if weekly_activity is not None and not weekly_activity.empty and "active_learners" in weekly_activity:
+        weekly = weekly_activity.copy()
+        if "activity_week" in weekly.columns:
+            weekly = weekly.sort_values("activity_week")
+        weekly_active = _number(weekly.iloc[-1]["active_learners"])
+
+    return [
+        _percentage_alert("Dropout Rate", _number(kpis.get("dropout_rate_pct")), thresholds.dropout_warning_pct, thresholds.dropout_critical_pct, "Dropout rate", True),
+        _percentage_alert("Completion Rate", _number(kpis.get("completion_rate_pct")), thresholds.completion_warning_pct, thresholds.completion_critical_pct, "Completion rate", False),
+        _percentage_alert("At-Risk Student Percentage", at_risk_pct, thresholds.at_risk_warning_pct, thresholds.at_risk_critical_pct, "At-risk student percentage", True),
+        _minimum_alert("Weekly Active Learners", weekly_active, thresholds.weekly_active_learners_warning, thresholds.weekly_active_learners_critical, "Weekly active learners"),
+        _percentage_alert("Engagement Rate", engagement_rate, thresholds.engagement_rate_warning_pct, thresholds.engagement_rate_critical_pct, "Engagement rate", False),
+        _percentage_alert("Significant Activity Decline", _activity_decline_pct(weekly_activity), decline_warning, decline_critical, "Activity decline", True),
     ]
-
-    decline = _engagement_decline_pct(weekly_activity)
-    if decline is not None:
-        alerts.append(
-            _alert(
-                "Engagement decline",
-                _higher_is_worse(
-                    decline,
-                    thresholds.engagement_decline_warning_pct,
-                    thresholds.engagement_decline_critical_pct,
-                ),
-                decline,
-                thresholds.engagement_decline_warning_pct,
-                "Engagement is stable week over week."
-                if _higher_is_worse(decline, thresholds.engagement_decline_warning_pct, thresholds.engagement_decline_critical_pct) == NORMAL
-                else f"Average activity declined {decline:.1f}% week over week; investigate emerging disengagement.",
-            )
-        )
-    else:
-        alerts.append(
-            _alert(
-                "Engagement decline",
-                NORMAL,
-                0.0,
-                thresholds.engagement_decline_warning_pct,
-                "Not enough consecutive activity periods are available to detect a sudden engagement decline.",
-            )
-        )
-    return alerts
 
 
 def overall_alert_status(alerts: List[MetricAlert]) -> str:
