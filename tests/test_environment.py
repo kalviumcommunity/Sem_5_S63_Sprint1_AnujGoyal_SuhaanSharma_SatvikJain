@@ -96,6 +96,8 @@ def test_cleaning_module():
 
 
 def test_pipeline_execution():
-    """Verify that pipeline runs without errors."""
+    """Verify that missing production sources fail with a useful status."""
     result = run_pipeline()
-    assert result["status"] == "SUCCESS"
+    assert result["status"] == "FAILURE"
+    assert result["failed_stage"] == "source_validation"
+    assert "requires source entities" in result["message"]

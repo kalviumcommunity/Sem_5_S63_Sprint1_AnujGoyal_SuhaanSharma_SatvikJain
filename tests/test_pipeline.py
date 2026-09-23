@@ -57,6 +57,7 @@ def test_pipeline_executes_all_stages_and_generates_outputs(tmp_path):
         source_data=pipeline_source(),
         db_path=tmp_path / "analytics.db",
         output_dir=tmp_path / "reports",
+        processed_dir=tmp_path / "processed",
     )
 
     assert result["status"] == "SUCCESS"
@@ -88,3 +89,38 @@ def test_pipeline_returns_clear_failure_for_incomplete_source(tmp_path):
 
     assert result["status"] == "FAILURE"
     assert "requires source entities" in result["message"]
+
+
+def test_pipeline_rejects_invalid_input(tmp_path):
+    result = run_pipeline(source_data=None, source_dir=tmp_path / "missing", db_path=tmp_path / "analytics.db")
+
+    assert result["status"] == "FAILURE"
+    assert result["stages"]["source_validation"] == "FAILED"
+    assert "requires source entities" in result["message"]
+
+
+def test_pipeline_reports_source_validation_failure(tmp_path):
+    invalid = pipeline_source()
+    invalid["students"] = invalid["students"].drop(columns=["student_id"])
+
+    result = run_pipeline(source_data=invalid, db_path=tmp_path / "analytics.db")
+
+    assert result["status"] == "FAILURE"
+    assert result["failed_stage"] == "source_validation"
+    assert "validation" in result["message"]
+
+
+def test_pipeline_handles_stage_errors_with_structured_failure(tmp_path, monkeypatch):
+    def fail_features(*args, **kwargs):
+        raise RuntimeError("feature service unavailable")
+
+    monkeypatch.setattr("src.pipeline.engineer_behavioral_features", fail_features)
+    result = run_pipeline(
+        source_data=pipeline_source(),
+        db_path=tmp_path / "analytics.db",
+        generate_outputs=False,
+    )
+
+    assert result["status"] == "FAILURE"
+    assert result["failed_stage"] == "feature_engineering"
+    assert "feature service unavailable" in result["message"]
