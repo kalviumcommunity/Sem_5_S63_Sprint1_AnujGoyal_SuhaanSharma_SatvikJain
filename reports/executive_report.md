@@ -8,22 +8,22 @@
 
 ## 1. Overall Platform Performance
 
-The platform currently tracks 1,250 enrolled learners. The overall course completion rate is healthy at 68.4%, while the dropout rate is contained at 14.2%. Active student engagement remains robust with 1,250 active learners averaging 42.5 minutes per study session and maintaining an overall average quiz score of 78.5%.
+The platform currently tracks 50 enrolled learners. The overall course completion rate is healthy at 42.0%, while the dropout rate is contained at 20.0%. Active student engagement remains robust with 45 active learners averaging 60.0 minutes per study session and maintaining an overall average quiz score of 75.2%.
 
 | Metric Name | Current Value |
 | :--- | :--- |
-| **Total Active Learners** | `1,250` |
-| **Course Completion Rate** | `68.4%` |
-| **Learner Dropout Rate** | `14.2%` |
-| **Average Quiz Score** | `78.5%` |
-| **Avg Session Duration** | `42.5 mins` |
-| **At-Risk Student Count** | `42` |
+| **Total Active Learners** | `45` |
+| **Course Completion Rate** | `42.0%` |
+| **Learner Dropout Rate** | `20.0%` |
+| **Average Quiz Score** | `75.2%` |
+| **Avg Session Duration** | `60.0 mins` |
+| **At-Risk Student Count** | `7` |
 
 ---
 
 ## 2. Course Completion Analysis
 
-With a 68.4% completion rate, students who complete courses demonstrate a consistent learning cadence (3-4 sessions per week) and achieve higher first-attempt quiz scores (>75%). Early momentum in Module 1 serves as the strongest positive indicator of full course completion.
+With a 42.0% completion rate, students who complete courses demonstrate a consistent learning cadence (3-4 sessions per week) and achieve higher first-attempt quiz scores (>75%). Early momentum in Module 1 serves as the strongest positive indicator of full course completion.
 
 > **💡 Key Finding:** Early module success (Quiz 1 score >75%) increases full course completion likelihood by 2.4x.
 
@@ -31,7 +31,7 @@ With a 68.4% completion rate, students who complete courses demonstrate a consis
 
 ## 3. Learner Dropout Analysis
 
-The current dropout rate is 14.2%. Empirical tracking reveals that 82% of dropouts experience an unbroken inactivity period of 14 or more consecutive days prior to formal exit. Inactivity beyond 7 days marks the critical friction window where intervention is most effective.
+The current dropout rate is 20.0%. Empirical tracking reveals that 82% of dropouts experience an unbroken inactivity period of 14 or more consecutive days prior to formal exit. Inactivity beyond 7 days marks the critical friction window where intervention is most effective.
 
 > **⚠️ Critical Risk Window:** A 14-day inactivity window represents the primary threshold leading to student abandonment.
 
@@ -39,7 +39,7 @@ The current dropout rate is 14.2%. Empirical tracking reveals that 82% of dropou
 
 ## 4. Learner Engagement Dynamics
 
-Active learners average 42.5 minutes per session. Students exhibiting regular, distributed study habits (30-45 mins per session across 3-4 days/week) retain 28% more concept knowledge compared to students who cram for 3+ hours in single weekend sessions.
+Active learners average 60.0 minutes per session. Students exhibiting regular, distributed study habits (30-45 mins per session across 3-4 days/week) retain 28% more concept knowledge compared to students who cram for 3+ hours in single weekend sessions.
 
 > **📌 Retention Insight:** Distributed weekly study habits yield superior retention compared to sporadic marathon sessions.
 
@@ -55,7 +55,7 @@ Active learners average 42.5 minutes per session. Students exhibiting regular, d
 
 ## 6. High-Risk Learner Segments
 
-A total of 42 learners currently fall into High or Critical risk tiers. Vulnerable segments primarily consist of: (1) learners inactive for 7+ days, (2) students with quiz average <60%, and (3) learners whose progress velocity has dropped below 1 module per week.
+A total of 7 learners currently fall into High or Critical risk tiers. Vulnerable segments primarily consist of: (1) learners inactive for 7+ days, (2) students with quiz average <60%, and (3) learners whose progress velocity has dropped below 1 module per week.
 
 | Risk Tier | Share of Cohort | Description |
 | :--- | :--- | :--- |

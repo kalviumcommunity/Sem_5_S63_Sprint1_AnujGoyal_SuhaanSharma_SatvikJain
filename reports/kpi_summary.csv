@@ -1,0 +1,2 @@
+total_students,completion_rate_pct,dropout_rate_pct,avg_quiz_score_pct,avg_session_duration_minutes,active_learner_count,at_risk_learner_count
+50.0,42.0,20.0,75.2,60.0,45.0,7.0

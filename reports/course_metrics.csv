@@ -1,0 +1,5 @@
+course_id,course_title,category,difficulty_level,total_modules,total_quizzes,estimated_duration_hours,total_enrolled,completed_count,dropped_count,completion_rate_pct,avg_engagement_score,avg_course_progress,avg_quiz_score
+C001,Python for Data Science,Data Science,Beginner,12,6,24.0,10,5,2,50.0,38.51,25.0,76.75
+C002,SQL Database Analytics,Database,Intermediate,10,5,18.0,16,8,1,50.0,52.01,40.0,75.45
+C003,Machine Learning Fundamentals,AI & Machine Learning,Advanced,15,8,30.0,13,6,4,46.15,37.12,16.35,56.99
+C004,Web Development,Development,Beginner,8,4,12.0,11,2,3,18.18,39.64,25.0,59.95

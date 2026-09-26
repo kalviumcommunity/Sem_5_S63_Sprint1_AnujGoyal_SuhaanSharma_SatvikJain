@@ -1,5 +1,5 @@
 {
-  "database_path": "C:\\Users\\91730\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
+  "database_path": "C:\\Users\\mukes\\OneDrive\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
   "join_duplication_integrity": {
     "base_students_count": 50,
     "joined_records_count": 50,

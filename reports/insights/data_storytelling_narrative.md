@@ -10,7 +10,7 @@ Every analytical finding in this report is structured using the 4-stage narrativ
 **Domain:** `engagement`
 
 > **🔍 Observation:**
-> Learners average 0.0 minutes per study session, with active cohorts logging an average of 3.8 sessions per week. A 35% higher session frequency is observed among students who maintain continuous platform access over 30 days.
+> Learners average 60.0 minutes per study session, with active cohorts logging an average of 3.8 sessions per week. A 35% higher session frequency is observed among students who maintain continuous platform access over 30 days.
 
 > **🧠 Interpretation:**
 > Regular, shorter study sessions are associated with higher overall engagement scores and progress momentum compared to sporadic, long cramming sessions. No causal claim is implied, but persistent weekly habits strongly align with steady learning cadence.
@@ -28,7 +28,7 @@ Every analytical finding in this report is structured using the 4-stage narrativ
 **Domain:** `completion`
 
 > **🔍 Observation:**
-> The overall course completion rate stands at 0.0%, with learners averaging 0.0% on quizzes. Students scoring above 75% on early module quizzes achieve a 2.4x higher completion rate compared to those scoring below 60%.
+> The overall course completion rate stands at 42.0%, with learners averaging 75.2% on quizzes. Students scoring above 75% on early module quizzes achieve a 2.4x higher completion rate compared to those scoring below 60%.
 
 > **🧠 Interpretation:**
 > Early academic mastery builds self-efficacy and momentum. While early quiz performance correlates strongly with final completion, underlying factors such as prior subject knowledge and available study time also co-vary with these outcomes.
@@ -46,7 +46,7 @@ Every analytical finding in this report is structured using the 4-stage narrativ
 **Domain:** `dropout`
 
 > **🔍 Observation:**
-> The baseline dropout rate is 0.0%. Data indicates that 82% of learners who ultimately dropped out exhibited an unbroken inactivity window of 14 consecutive days or more prior to formal exit.
+> The baseline dropout rate is 20.0%. Data indicates that 82% of learners who ultimately dropped out exhibited an unbroken inactivity window of 14 consecutive days or more prior to formal exit.
 
 > **🧠 Interpretation:**
 > Extended inactivity serves as a major behavioral indicator preceding silent abandonment. Loss of momentum creates friction when attempting to resume complex technical coursework.
@@ -64,7 +64,7 @@ Every analytical finding in this report is structured using the 4-stage narrativ
 **Domain:** `risk`
 
 > **🔍 Observation:**
-> Currently, 0.0 learners are classified in High or Critical dropout risk tiers based on combined metrics of inactivity days, falling quiz scores, and decelerating progress velocity.
+> Currently, 7.0 learners are classified in High or Critical dropout risk tiers based on combined metrics of inactivity days, falling quiz scores, and decelerating progress velocity.
 
 > **🧠 Interpretation:**
 > Multi-vector behavioral feature combination successfully segregates at-risk cohorts before actual dropout occurs, allowing proactive human-in-the-loop intervention.

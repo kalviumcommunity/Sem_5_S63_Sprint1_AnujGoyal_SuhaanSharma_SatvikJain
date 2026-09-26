@@ -13,10 +13,219 @@ from dashboard.sharing import DeliveryResult, PeriodicSummary
 
 
 def render_header(title: str, subtitle: str) -> None:
-    """Renders a standard application header."""
-    st.title(title)
-    st.caption(subtitle)
-    st.divider()
+    """Renders a standard application header with engaging retro-boxy neo-brutalist styling."""
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+
+        /* App canvas & typography */
+        .stApp, [data-testid="stAppViewContainer"], .main {
+            background-color: #FDFBF7 !important;
+            color: #18181B !important;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+        }
+
+        /* Retro Command Hero Banner */
+        .retro-banner {
+            background-color: #FFFFFF;
+            border: 2.5px solid #18181B;
+            border-radius: 4px;
+            box-shadow: 4px 4px 0px #18181B;
+            padding: 18px 24px;
+            margin-bottom: 22px;
+            position: relative;
+        }
+        .retro-badge-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .retro-chip {
+            background-color: #FEF08A;
+            border: 1.5px solid #18181B;
+            border-radius: 2px;
+            box-shadow: 2px 2px 0px #18181B;
+            color: #18181B;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            letter-spacing: 0.05em;
+            display: inline-block;
+        }
+        .retro-chip-live {
+            background-color: #BBF7D0;
+            border: 1.5px solid #18181B;
+            border-radius: 2px;
+            box-shadow: 2px 2px 0px #18181B;
+            color: #14532D;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            letter-spacing: 0.05em;
+            display: inline-block;
+        }
+        .retro-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #18181B;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.02em;
+        }
+        .retro-subtitle {
+            font-size: 0.95rem;
+            color: #52525B;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Retro Sidebar */
+        [data-testid="stSidebar"], [data-testid="stSidebarContent"] {
+            background-color: #F4EFE6 !important;
+            border-right: 2.5px solid #18181B !important;
+        }
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+            color: #27272A !important;
+            font-weight: 600 !important;
+        }
+
+        /* Metric Cards: Chunky, tactile, offset hard shadows */
+        [data-testid="stMetric"] {
+            background-color: #FFFFFF !important;
+            border: 2.5px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 4px 4px 0px #18181B !important;
+            padding: 16px 20px !important;
+            transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+        }
+        [data-testid="stMetric"]:hover {
+            transform: translate(-2px, -2px) !important;
+            box-shadow: 6px 6px 0px #18181B !important;
+        }
+        [data-testid="stMetricLabel"] p {
+            font-family: 'Space Mono', monospace !important;
+            color: #52525B !important;
+            font-size: 0.8rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.04em !important;
+        }
+        [data-testid="stMetricValue"] {
+            font-family: 'Space Mono', monospace !important;
+            color: #18181B !important;
+            font-weight: 700 !important;
+            font-size: 1.85rem !important;
+        }
+
+        /* Buttons & Download buttons: Tactile mechanical press feel */
+        .stButton > button, [data-testid="stDownloadButton"] > button {
+            background-color: #FFFFFF !important;
+            color: #18181B !important;
+            border: 2.5px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 3.5px 3.5px 0px #18181B !important;
+            font-family: 'Space Mono', monospace !important;
+            font-weight: 700 !important;
+            font-size: 0.88rem !important;
+            padding: 8px 18px !important;
+            transition: all 0.1s ease !important;
+        }
+        .stButton > button:hover, [data-testid="stDownloadButton"] > button:hover {
+            background-color: #FEF08A !important;
+            color: #18181B !important;
+            transform: translate(-1.5px, -1.5px) !important;
+            box-shadow: 5px 5px 0px #18181B !important;
+        }
+        .stButton > button:active, [data-testid="stDownloadButton"] > button:active {
+            transform: translate(2px, 2px) !important;
+            box-shadow: 1px 1px 0px #18181B !important;
+        }
+
+        /* Form Inputs & Selectboxes */
+        [data-baseweb="select"] > div, .stTextInput > div > div > input, .stMultiSelect {
+            background-color: #FFFFFF !important;
+            border: 2px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 2px 2px 0px #18181B !important;
+            color: #18181B !important;
+        }
+
+        /* Radio Options */
+        [data-testid="stRadio"] label {
+            font-family: 'Space Mono', monospace !important;
+            font-size: 0.88rem !important;
+            font-weight: 600 !important;
+            color: #18181B !important;
+        }
+
+        /* Plotly Chart Card Framing */
+        [data-testid="stPlotlyChart"] {
+            background-color: #FFFFFF !important;
+            border: 2.5px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 4px 4px 0px #18181B !important;
+            padding: 10px !important;
+            margin-bottom: 20px !important;
+        }
+
+        /* Tables & DataFrames */
+        [data-testid="stDataFrame"], [data-testid="stTable"] {
+            border: 2.5px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 3.5px 3.5px 0px #18181B !important;
+            background-color: #FFFFFF !important;
+        }
+
+        /* Expanders & Accordions */
+        [data-testid="stExpander"] {
+            background-color: #FFFFFF !important;
+            border: 2px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 3px 3px 0px #18181B !important;
+        }
+
+        /* Alert Notification Banners */
+        .stAlert {
+            border: 2px solid #18181B !important;
+            border-radius: 4px !important;
+            box-shadow: 3px 3px 0px #18181B !important;
+            font-weight: 600 !important;
+        }
+
+        /* Headings */
+        h1, h2, h3, h4, h5, h6 {
+            color: #18181B !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        /* Dashed retro dividers */
+        hr {
+            border: none !important;
+            border-top: 2px dashed #18181B !important;
+            margin: 20px 0 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        f"""
+        <div class="retro-banner">
+            <div class="retro-badge-row">
+                <span class="retro-chip">⚡ EDTECH INTELLIGENCE</span>
+                <span class="retro-chip-live">● SYSTEM ACTIVE</span>
+                <span class="retro-chip">RETRO-BOX SPEC</span>
+            </div>
+            <div class="retro-title">{title}</div>
+            <div class="retro-subtitle">{subtitle}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 def render_kpi_card(

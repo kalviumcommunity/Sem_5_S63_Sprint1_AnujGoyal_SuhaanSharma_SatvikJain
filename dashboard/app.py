@@ -3,6 +3,14 @@ Main Streamlit Application
 Learning Behaviour & Course Completion Intelligence Data Product
 """
 
+import sys
+from pathlib import Path
+
+# Ensure project root is in sys.path when running via 'streamlit run dashboard/app.py'
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import streamlit as st
 from dashboard.components import render_header
 from dashboard.filters import filter_dashboard_views, render_filter_sidebar

@@ -1,5 +1,5 @@
 {
-  "database_path": "C:\\Users\\91730\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
+  "database_path": "C:\\Users\\mukes\\OneDrive\\Desktop\\Sem_5_S63_Sprint1_AnujGoyal_SuhaanSharma_SatvikJain\\data\\database\\learning_analytics.db",
   "status": "VALID",
   "inserted_records": {
     "students": 50,
@@ -12,8 +12,8 @@
     "status": "VALID",
     "existing_tables": [
       "sessions",
-      "behavioural_features",
       "student_behaviour_summary",
+      "behavioural_features",
       "courses",
       "students",
       "quizzes"
