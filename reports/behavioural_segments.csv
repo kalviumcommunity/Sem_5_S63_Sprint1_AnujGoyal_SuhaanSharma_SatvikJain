@@ -1,0 +1,51 @@
+student_id,registration_date,age,gender,education_level,device_type,target_course_id,course_title,category,completion_status,avg_session_duration,sessions_per_week,quiz_average,course_progress,engagement_score,dropout_risk_level
+S0001,2026-01-01 00:00:00,20,Other,Postgraduate,Mobile,C002,SQL Database Analytics,Database,In Progress,60.0,0.42,76.1,20.0,52.4,Moderate
+S0002,2026-01-01 00:00:00,38,Male,High School,Desktop,C004,Web Development,Development,Completed,60.0,0.33,89.55,25.0,41.82,Moderate
+S0003,2026-01-01 00:00:00,35,Female,Postgraduate,Mobile,C002,SQL Database Analytics,Database,Completed,60.0,0.17,77.43,40.0,45.07,Moderate
+S0004,2026-01-01 00:00:00,29,Female,High School,Desktop,C003,Machine Learning Fundamentals,AI & Machine Learning,Completed,60.0,0.08,71.07,12.5,32.58,Moderate
+S0005,2026-01-02 00:00:00,29,Female,Postgraduate,Desktop,C002,SQL Database Analytics,Database,In Progress,60.0,0.34,61.76,100.0,74.89,Low
+S0006,2026-01-02 00:00:00,41,Male,Postgraduate,Tablet,C002,SQL Database Analytics,Database,Completed,60.0,0.34,97.2,20.0,53.12,Moderate
+S0007,2026-01-02 00:00:00,20,Female,Postgraduate,Laptop,C004,Web Development,Development,Dropped,60.0,0.51,53.9,25.0,48.05,Moderate
+S0008,2026-01-02 00:00:00,36,Male,Undergraduate,Tablet,C004,Web Development,Development,In Progress,60.0,0.42,78.87,50.0,47.51,Moderate
+S0009,2026-01-03 00:00:00,23,Other,Undergraduate,Tablet,C002,SQL Database Analytics,Database,Completed,60.0,0.26,92.16,60.0,47.66,Moderate
+S0010,2026-01-03 00:00:00,20,Other,Postgraduate,Mobile,C004,Web Development,Development,In Progress,60.0,0.26,56.4,25.0,37.16,Moderate
+S0011,2026-01-03 00:00:00,32,Other,High School,Mobile,C002,SQL Database Analytics,Database,Completed,0.0,0.0,72.83,40.0,28.67,Moderate
+S0012,2026-01-03 00:00:00,44,Other,Postgraduate,Tablet,C003,Machine Learning Fundamentals,AI & Machine Learning,Dropped,60.0,0.26,63.15,25.0,50.5,Moderate
+S0013,2026-01-04 00:00:00,37,Female,Undergraduate,Desktop,C004,Web Development,Development,In Progress,60.0,0.17,69.55,25.0,33.52,Moderate
+S0014,2026-01-04 00:00:00,38,Other,Undergraduate,Desktop,C002,SQL Database Analytics,Database,In Progress,60.0,0.17,83.2,40.0,51.64,Moderate
+S0015,2026-01-04 00:00:00,37,Female,Undergraduate,Desktop,C003,Machine Learning Fundamentals,AI & Machine Learning,Completed,60.0,0.52,80.15,12.5,39.5,Moderate
+S0016,2026-01-04 00:00:00,39,Male,Undergraduate,Mobile,C002,SQL Database Analytics,Database,In Progress,60.0,0.35,72.0,40.0,59.19,Moderate
+S0017,2026-01-05 00:00:00,31,Other,High School,Desktop,C001,Python for Data Science,Data Science,In Progress,60.0,0.26,75.05,50.0,55.38,Moderate
+S0018,2026-01-05 00:00:00,21,Female,High School,Laptop,C001,Python for Data Science,Data Science,Dropped,0.0,0.0,82.6,16.67,30.0,Moderate
+S0019,2026-01-05 00:00:00,40,Male,High School,Desktop,C002,SQL Database Analytics,Database,In Progress,60.0,0.35,64.3,20.0,53.19,Moderate
+S0020,2026-01-05 00:00:00,30,Female,High School,Laptop,C004,Web Development,Development,In Progress,60.0,0.09,73.03,75.0,68.06,Low
+S0021,2026-01-06 00:00:00,31,Other,Undergraduate,Laptop,C001,Python for Data Science,Data Science,Completed,60.0,0.35,98.2,0.0,20.73,High
+S0022,2026-01-06 00:00:00,28,Male,Postgraduate,Laptop,C002,SQL Database Analytics,Database,Completed,60.0,0.44,76.9,40.0,59.75,Moderate
+S0023,2026-01-06 00:00:00,22,Female,Undergraduate,Mobile,C003,Machine Learning Fundamentals,AI & Machine Learning,In Progress,0.0,0.0,75.9,25.0,24.17,Moderate
+S0024,2026-01-06 00:00:00,43,Male,Undergraduate,Tablet,C001,Python for Data Science,Data Science,In Progress,60.0,0.27,62.65,16.67,39.19,Moderate
+S0025,2026-01-07 00:00:00,39,Other,Postgraduate,Tablet,C003,Machine Learning Fundamentals,AI & Machine Learning,Completed,60.0,0.27,0.0,0.0,17.67,High
+S0026,2026-01-07 00:00:00,35,Female,Undergraduate,Desktop,C002,SQL Database Analytics,Database,Dropped,60.0,0.36,75.4,20.0,39.61,Moderate
+S0027,2026-01-07 00:00:00,28,Male,High School,Tablet,C004,Web Development,Development,Dropped,60.0,0.27,60.83,0.0,21.69,High
+S0028,2026-01-07 00:00:00,40,Male,Postgraduate,Laptop,C003,Machine Learning Fundamentals,AI & Machine Learning,Completed,60.0,0.09,76.9,12.5,35.11,Moderate
+S0029,2026-01-08 00:00:00,32,Female,Undergraduate,Mobile,C003,Machine Learning Fundamentals,AI & Machine Learning,In Progress,60.0,0.09,64.2,12.5,39.95,Moderate
+S0030,2026-01-08 00:00:00,29,Other,Undergraduate,Tablet,C001,Python for Data Science,Data Science,Completed,60.0,0.36,91.7,0.0,16.23,High
+S0031,2026-01-08 00:00:00,30,Other,Undergraduate,Mobile,C002,SQL Database Analytics,Database,In Progress,60.0,0.18,57.7,20.0,41.62,Moderate
+S0032,2026-01-08 00:00:00,24,Female,Undergraduate,Laptop,C004,Web Development,Development,Completed,60.0,0.18,93.4,25.0,47.82,Moderate
+S0033,2026-01-09 00:00:00,20,Male,High School,Desktop,C001,Python for Data Science,Data Science,In Progress,0.0,0.0,83.15,50.0,33.75,Moderate
+S0034,2026-01-09 00:00:00,32,Other,Undergraduate,Tablet,C004,Web Development,Development,In Progress,60.0,0.37,0.0,0.0,22.31,High
+S0035,2026-01-09 00:00:00,41,Female,Postgraduate,Desktop,C002,SQL Database Analytics,Database,In Progress,60.0,0.09,68.1,20.0,46.66,Moderate
+S0036,2026-01-09 00:00:00,19,Other,High School,Desktop,C003,Machine Learning Fundamentals,AI & Machine Learning,Completed,60.0,0.18,98.4,12.5,46.28,Moderate
+S0037,2026-01-10 00:00:00,41,Male,Undergraduate,Laptop,C003,Machine Learning Fundamentals,AI & Machine Learning,Dropped,60.0,0.37,56.55,12.5,37.56,Moderate
+S0038,2026-01-10 00:00:00,40,Male,High School,Desktop,C002,SQL Database Analytics,Database,Completed,60.0,0.47,80.56,80.0,61.16,Moderate
+S0039,2026-01-10 00:00:00,25,Other,Undergraduate,Laptop,C002,SQL Database Analytics,Database,Completed,60.0,0.37,67.2,20.0,53.31,Moderate
+S0040,2026-01-10 00:00:00,35,Other,Undergraduate,Desktop,C003,Machine Learning Fundamentals,AI & Machine Learning,In Progress,60.0,0.19,0.0,0.0,21.19,High
+S0041,2026-01-11 00:00:00,22,Female,Postgraduate,Tablet,C001,Python for Data Science,Data Science,Completed,60.0,0.19,65.1,16.67,47.79,Moderate
+S0042,2026-01-11 00:00:00,38,Other,High School,Tablet,C003,Machine Learning Fundamentals,AI & Machine Learning,Dropped,60.0,0.28,75.93,37.5,55.46,Moderate
+S0043,2026-01-11 00:00:00,36,Other,High School,Tablet,C001,Python for Data Science,Data Science,Dropped,60.0,0.28,56.95,33.33,55.87,Moderate
+S0044,2026-01-11 00:00:00,27,Female,Undergraduate,Desktop,C003,Machine Learning Fundamentals,AI & Machine Learning,Completed,60.0,0.28,78.68,50.0,61.75,Low
+S0045,2026-01-12 00:00:00,19,Other,Postgraduate,Mobile,C003,Machine Learning Fundamentals,AI & Machine Learning,Dropped,60.0,0.48,0.0,0.0,20.9,High
+S0046,2026-01-12 00:00:00,44,Male,Postgraduate,Laptop,C001,Python for Data Science,Data Science,Completed,0.0,0.0,72.75,33.33,35.0,Moderate
+S0047,2026-01-12 00:00:00,30,Male,High School,Desktop,C004,Web Development,Development,In Progress,60.0,0.77,0.0,0.0,24.51,Moderate
+S0048,2026-01-12 00:00:00,42,Other,High School,Laptop,C002,SQL Database Analytics,Database,Completed,60.0,0.19,84.43,60.0,64.19,Low
+S0049,2026-01-13 00:00:00,36,Female,Postgraduate,Desktop,C004,Web Development,Development,Dropped,60.0,0.58,83.95,25.0,43.62,Moderate
+S0050,2026-01-13 00:00:00,39,Male,High School,Mobile,C001,Python for Data Science,Data Science,Completed,60.0,0.19,79.3,33.33,51.13,Moderate

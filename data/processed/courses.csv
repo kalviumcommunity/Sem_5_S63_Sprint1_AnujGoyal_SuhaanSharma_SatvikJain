@@ -1,0 +1,5 @@
+course_id,course_title,category,total_modules,total_quizzes,estimated_duration_hours,difficulty_level,total_modules_outlier_class,total_modules_is_outlier,total_quizzes_outlier_class,total_quizzes_is_outlier,estimated_duration_hours_outlier_class,estimated_duration_hours_is_outlier
+C003,Machine Learning Fundamentals,AI & Machine Learning,15,8,30.0,Advanced,Normal,0,Normal,0,Normal,0
+C001,Python for Data Science,Data Science,12,6,24.0,Beginner,Normal,0,Normal,0,Normal,0
+C002,SQL Database Analytics,Database,10,5,18.0,Intermediate,Normal,0,Normal,0,Normal,0
+C004,Web Development,Development,8,4,12.0,Beginner,Normal,0,Normal,0,Normal,0
